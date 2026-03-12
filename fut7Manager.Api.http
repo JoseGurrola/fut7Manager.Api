@@ -1,0 +1,6 @@
+@fut7Manager.Api_HostAddress = http://localhost:5116
+
+GET {{fut7Manager.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
