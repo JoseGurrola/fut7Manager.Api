@@ -1,9 +1,13 @@
+using fut7Manager.Api.Mapping;
+using fut7Manager.Api.Models;
+using fut7Manager.Api.Services;
+using fut7Manager.Api.Services.Interfaces;
+using fut7Manager.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using fut7Manager.Data;
 using Microsoft.OpenApi.Models;
+using System.Text;
 
 //using fut7Manager.Services;
 
@@ -19,7 +23,7 @@ Exception middleware (captura errores)
      ▼
 Controller
      ▼
-UserService
+Services
      ▼
 Entity Framework
      ▼
@@ -32,9 +36,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-//builder.Services.AddAutoMapper(typeof(Program)); // registra AutoMapper
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))); // Configura Entity Framework para usar SQL Server
+
+builder.Services.AddAutoMapper(typeof(MappingProfile)); // registra AutoMapper
 
 builder.Services.AddEndpointsApiExplorer(); // Permite que Swagger descubra los endpoints automáticamente
+
+
+builder.Services.AddScoped<IPlayerService, PlayerService>();
+builder.Services.AddScoped<ILeagueService, LeagueService>();
+builder.Services.AddScoped<ITeamService, TeamService>();
+builder.Services.AddScoped<IFut7MatchService, Fut7MatchService>();
 
 builder.Services.AddSwaggerGen(options => { // Configuración de Swagger (documentación de la API)
     options.SwaggerDoc("v1", new() { Title = "fut7Manager", Version = "v1" }); // Define un documento Swagger versión 1
