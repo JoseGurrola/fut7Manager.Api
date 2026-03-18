@@ -24,9 +24,9 @@ namespace fut7Manager.Api.Services {
                 .AsNoTracking()
                 .ProjectTo<LeagueDto>(_mapper.ConfigurationProvider);
 
-            return await query.ToPagedResultAsync(
-                pagination.PageNumber,
-                pagination.PageSize);
+            return await query.ToPagedResultAsync(q => q.OrderBy(x => x.Id),
+               pagination.PageNumber,
+               pagination.PageSize);
         }
 
         public async Task<LeagueDto?> GetLeagueByIdAsync(int id) {

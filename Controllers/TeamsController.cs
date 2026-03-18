@@ -2,11 +2,13 @@
 using fut7Manager.Api.DTOs.Responses;
 using fut7Manager.Api.Extensions;
 using fut7Manager.Api.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace fut7Manager.Api.Controllers {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class TeamsController : ControllerBase {
         private readonly ITeamService _teamService;
 

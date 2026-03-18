@@ -24,9 +24,9 @@ namespace fut7Manager.Api.Services {
                 .AsNoTracking()
                 .ProjectTo<TeamDto>(_mapper.ConfigurationProvider);
 
-            return await query.ToPagedResultAsync(
-                pagination.PageNumber,
-                pagination.PageSize);
+            return await query.ToPagedResultAsync(q => q.OrderBy(x => x.Id),
+               pagination.PageNumber,
+               pagination.PageSize);
         }
 
         public async Task<TeamDto?> GetTeamByIdAsync(int id) {

@@ -24,7 +24,7 @@ namespace fut7Manager.Api.Services {
                 .AsNoTracking()
                 .ProjectTo<Fut7MatchDto>(_mapper.ConfigurationProvider);
 
-            return await query.ToPagedResultAsync(
+            return await query.ToPagedResultAsync(q => q.OrderBy(x => x.Id),
                 pagination.PageNumber,
                 pagination.PageSize);
         }

@@ -1,16 +1,18 @@
 ﻿using fut7Manager.Api.DTOs.Requests;
 using fut7Manager.Api.DTOs.Responses;
+using fut7Manager.Api.Extensions;
 using fut7Manager.Api.Models;
 using fut7Manager.Api.Services;
 using fut7Manager.Api.Services.Interfaces;
 using fut7Manager.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using fut7Manager.Api.Extensions;
 
 namespace fut7Manager.Api.Controllers {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class Fut7MatchesController : ControllerBase {
         private readonly IFut7MatchService _matchService;
 
