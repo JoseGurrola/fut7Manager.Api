@@ -27,13 +27,16 @@ namespace fut7Manager.Middleware {
             catch (Exception ex) {
 
                 // Si ocurre cualquier excepción en la API  se registra en el log
-                _logger.LogError(ex, "Unhandled exception occurred");
+                _logger.LogError(ex,
+                    "Unhandled exception for {method} {url}",
+                    context.Request.Method,
+                    context.Request.Path);
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError; //500
                 context.Response.ContentType = "application/json";
                 //objeto de respuesta
                 var response = new {
                     success = false,
-                    message = "Internal server error"
+                    message = $"Internal server error: {ex.Message}"
                 };
 
                 var json = JsonSerializer.Serialize(response);

@@ -1,13 +1,16 @@
 using fut7Manager.Api.Mapping;
+using fut7Manager.Api.MiddleWare;
 using fut7Manager.Api.Models;
 using fut7Manager.Api.Services;
 using fut7Manager.Api.Services.Interfaces;
 using fut7Manager.Data;
+using fut7Manager.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using Serilog;
 
 //using fut7Manager.Services;
 
@@ -31,6 +34,21 @@ SQL Server
  */
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configuración de Serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
+    .MinimumLevel.Override("System", Serilog.Events.LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File(
+        "logs/log-.txt",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 7)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 // Add services to the container.
 
@@ -105,6 +123,8 @@ app.UseAuthentication(); // Middleware que valida el JWT en cada request
 app.UseAuthorization(); // Middleware que aplica las reglas de autorización ([Authorize])
 
 app.UseMiddleware<fut7Manager.Middleware.ExceptionMiddleware>(); // Middleware personalizado para manejar excepciones globalmente
+app.UseMiddleware<RequestResponseLoggingMiddleware>();
+app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseSwagger(); // Activa Swagger
 
@@ -114,4 +134,13 @@ app.MapControllers(); // Mapea automáticamente los controllers como endpoints H
 
 //app.UseHttpsRedirection();
 
-app.Run(); // Inicia el servidor web
+try {
+    Log.Information("Starting Fut7Manager.Api");
+    app.Run();
+}
+catch (Exception ex) {
+    Log.Fatal(ex, "Application failed to start");
+}
+finally {
+    Log.CloseAndFlush();
+}
