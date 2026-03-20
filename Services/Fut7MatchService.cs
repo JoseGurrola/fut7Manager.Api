@@ -19,12 +19,24 @@ namespace fut7Manager.Api.Services {
             _mapper = mapper;
         }
 
-        public async Task<PagedResult<Fut7MatchDto>> GetMatchesAsync(PaginationParams pagination) {
+        public async Task<PagedResult<Fut7MatchDto>> GetMatchesAsync(int? leagueId, int? teamId, PaginationParams pagination) {
             var query = _context.Matches
                 .AsNoTracking()
+                .AsQueryable();
+
+            // Filtrar por liga directamente
+            if (leagueId.HasValue)
+                query = query.Where(m => m.LeagueId == leagueId.Value);
+
+            //Filtrar por equipo (en casa o visitante)
+            if(teamId.HasValue)
+                query = query.Where(m => m.HomeTeamId == teamId || m.AwayTeamId == teamId);
+
+            var dtoQuery = query
                 .ProjectTo<Fut7MatchDto>(_mapper.ConfigurationProvider);
 
-            return await query.ToPagedResultAsync(q => q.OrderBy(x => x.Id),
+            return await dtoQuery.ToPagedResultAsync(
+                q => q.OrderBy(x => x.Id),
                 pagination.PageNumber,
                 pagination.PageSize);
         }

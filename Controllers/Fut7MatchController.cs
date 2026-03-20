@@ -22,8 +22,9 @@ namespace fut7Manager.Api.Controllers {
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Fut7MatchDto>>> GetMatches(
+            [FromQuery] int? leagueId, [FromQuery] int? teamId,
     [FromQuery] PaginationParams pagination) {
-            var result = await _matchService.GetMatchesAsync(pagination);
+            var result = await _matchService.GetMatchesAsync(leagueId, teamId, pagination);
 
             Response.AddPaginationHeader(result);
 

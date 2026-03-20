@@ -18,8 +18,9 @@ namespace fut7Manager.Controllers {
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PlayerDto>>> GetPlayers(
-    [FromQuery] PaginationParams pagination) {
-            var result = await _playerService.GetPlayersAsync(pagination);
+            [FromQuery] int? leagueId, [FromQuery] int? teamId,
+            [FromQuery] PaginationParams pagination) {
+            var result = await _playerService.GetPlayersAsync(leagueId, teamId, pagination);
 
             Response.AddPaginationHeader(result);
 

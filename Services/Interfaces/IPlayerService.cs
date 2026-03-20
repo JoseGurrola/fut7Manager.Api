@@ -4,7 +4,7 @@ using fut7Manager.Api.Helpers;
 
 namespace fut7Manager.Api.Services.Interfaces {
     public interface IPlayerService {
-        Task<PagedResult<PlayerDto>> GetPlayersAsync(PaginationParams pagination);
+        Task<PagedResult<PlayerDto>> GetPlayersAsync(int? leagueId, int? teamId, PaginationParams pagination);
         Task<PlayerDto?> GetPlayerByIdAsync(int id);
 
         Task<PlayerDto> CreatePlayerAsync(CreatePlayerDto dto);

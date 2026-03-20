@@ -4,7 +4,7 @@ using fut7Manager.Api.Helpers;
 
 namespace fut7Manager.Api.Services.Interfaces {
     public interface IFut7MatchService {
-        Task<PagedResult<Fut7MatchDto>> GetMatchesAsync(PaginationParams pagination);
+        Task<PagedResult<Fut7MatchDto>> GetMatchesAsync(int? leagueId, int? teamId, PaginationParams pagination);
 
         Task<Fut7MatchDto?> GetMatchByIdAsync(int id);
 
