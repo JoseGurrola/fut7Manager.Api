@@ -1,11 +1,6 @@
 ﻿namespace fut7Manager.Api.DTOs.Requests {
-    public class CreateTeamDto {
+    public class CreateGroupDto {
         public string Name { get; set; } = default!;
-
-        public string? LogoUrl { get; set; }
-
         public int LeagueId { get; set; }
-
-        public int GroupId { get; set; }
     }
 }

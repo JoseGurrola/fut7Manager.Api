@@ -8,7 +8,7 @@ namespace fut7Manager.Api.Models {
         [Required]
         [MaxLength(100)]
         public string Name { get; set; } = default!;
-
+        public ICollection<Group> Groups { get; set; } = new List<Group>();
         public ICollection<Team> Teams { get; set; } = new List<Team>();
 
         public ICollection<Fut7Match> Matches { get; set; } = new List<Fut7Match>();

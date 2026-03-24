@@ -21,8 +21,9 @@ namespace fut7Manager.Api.Models {
         // Foreign Key
         public int LeagueId { get; set; }
 
-        // Navigation properties
-        //public League League { get; set; } = default!;
+        // Group
+        public int GroupId { get; set; }
+        public Group Group { get; set; } = default!;
 
         public ICollection<Player> Players { get; set; } = new List<Player>();
     }
