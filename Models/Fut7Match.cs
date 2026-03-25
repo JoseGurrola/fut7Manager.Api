@@ -2,15 +2,17 @@
     public class Fut7Match {
         public int Id { get; set; }
 
+        public int? MatchdayId { get; set; }
+        public Matchday? Matchday { get; set; } = default!;
         public int HomeTeamId { get; set; }
 
         public int AwayTeamId { get; set; }
 
-        public int HomeGoals { get; set; }
+        public int? HomeGoals { get; set; }
 
-        public int AwayGoals { get; set; }
+        public int? AwayGoals { get; set; }
 
-        public DateTime MatchDate { get; set; }
+        public DateTime? MatchDate { get; set; }
 
         public string? Location { get; set; }
 

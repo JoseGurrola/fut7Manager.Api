@@ -34,6 +34,9 @@ namespace fut7Manager.Api.Mapping {
             CreateMap<Group, GroupDto>();
             CreateMap<Group, GroupWithTeamsDto>();
             CreateMap<CreateGroupDto, Group>();
+
+            CreateMap<Fut7Match, Fut7MatchDto>();
+            CreateMap<Matchday, MatchdayDto>();
         }
     }
 }

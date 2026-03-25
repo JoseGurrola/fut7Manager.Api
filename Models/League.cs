@@ -12,5 +12,10 @@ namespace fut7Manager.Api.Models {
         public ICollection<Team> Teams { get; set; } = new List<Team>();
 
         public ICollection<Fut7Match> Matches { get; set; } = new List<Fut7Match>();
+
+        public ICollection<Matchday> Matchdays { get; set; } = new List<Matchday>();
+
+        public bool IsScheduleGenerated { get; set; }
+        public bool InterGroupMatches { get; set; }  // true = A vs B permitido
     }
 }

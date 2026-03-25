@@ -17,6 +17,8 @@ namespace fut7Manager.Data {
 
         public DbSet<Group> Groups { get; set; }
 
+        public DbSet<Matchday> Matchdays { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
             base.OnModelCreating(modelBuilder);
 
@@ -49,6 +51,12 @@ namespace fut7Manager.Data {
                 .WithMany(g => g.Teams)
                 .HasForeignKey(t => t.GroupId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Matchday>()
+                .HasOne(md => md.League)
+                .WithMany(l => l.Matchdays)
+                .HasForeignKey(md => md.LeagueId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

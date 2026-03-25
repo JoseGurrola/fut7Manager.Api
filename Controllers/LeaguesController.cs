@@ -1,6 +1,8 @@
-﻿using fut7Manager.Api.DTOs.Requests;
+﻿using AutoMapper;
+using fut7Manager.Api.DTOs.Requests;
 using fut7Manager.Api.DTOs.Responses;
 using fut7Manager.Api.Extensions;
+using fut7Manager.Api.Services;
 using fut7Manager.Api.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,9 +13,13 @@ namespace fut7Manager.Api.Controllers {
     [Authorize]
     public class LeaguesController : ControllerBase {
         private readonly ILeagueService _leagueService;
+        private readonly IScheduleService _scheduleService;
 
-        public LeaguesController(ILeagueService leagueService) {
+        private readonly IMapper _mapper;
+
+        public LeaguesController(ILeagueService leagueService, IScheduleService scheduleService, IMapper mapper) {
             _leagueService = leagueService;
+            _scheduleService = scheduleService;
         }
 
         [HttpGet]
@@ -51,6 +57,17 @@ namespace fut7Manager.Api.Controllers {
                 return NotFound();
 
             return NoContent();
+        }
+
+        [HttpPost("{id}/schedule")]
+        public async Task<IActionResult> GenerateSchedule(int id, GenerateScheduleDto dto) {
+            try {
+                var matchdays = await _scheduleService.GenerateScheduleAsync(id, dto.InterGroupMatches);
+                return Ok(matchdays);
+            }
+            catch (Exception ex) {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }
