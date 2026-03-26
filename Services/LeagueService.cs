@@ -8,6 +8,7 @@ using fut7Manager.Api.Models;
 using fut7Manager.Api.Services.Interfaces;
 using fut7Manager.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Numerics;
 
 namespace fut7Manager.Api.Services {
     public class LeagueService : ILeagueService {
@@ -44,6 +45,19 @@ namespace fut7Manager.Api.Services {
             await _context.SaveChangesAsync();
 
             return _mapper.Map<LeagueDto>(league);
+        }
+
+        public async Task<bool> UpdateLeagueAsync(int id, CreateLeagueDto dto){
+            var league = await _context.Leagues.FindAsync(id);
+
+            if (league == null)
+                return false;
+
+            _mapper.Map(dto, league);
+
+            await _context.SaveChangesAsync();
+
+            return true;
         }
 
         public async Task<bool> DeleteLeagueAsync(int id) {

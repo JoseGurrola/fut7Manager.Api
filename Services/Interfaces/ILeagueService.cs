@@ -10,6 +10,8 @@ namespace fut7Manager.Api.Services.Interfaces {
 
         Task<LeagueDto> CreateLeagueAsync(CreateLeagueDto dto);
 
+        Task<bool> UpdateLeagueAsync(int id, CreateLeagueDto dto);
+
         Task<bool> DeleteLeagueAsync(int id);
     }
 }
