@@ -51,20 +51,26 @@ namespace fut7Manager.Api.Services {
             _context.Teams.Add(team);
             await _context.SaveChangesAsync();
 
-            return _mapper.Map<TeamDto>(team);
+            return await _context.Teams
+                .Where(t => t.Id == team.Id)
+                .ProjectTo<TeamDto>(_mapper.ConfigurationProvider)
+                .FirstAsync();
         }
 
-        public async Task<bool> UpdateTeamAsync(int id, UpdateTeamDto dto) {
+        public async Task<TeamDto?> UpdateTeamAsync(int id, UpdateTeamDto dto) {
             var team = await _context.Teams.FindAsync(id);
 
             if (team == null)
-                return false;
+                return null;
 
             _mapper.Map(dto, team);
 
             await _context.SaveChangesAsync();
 
-            return true;
+            return await _context.Teams
+                .Where(t => t.Id == id)
+                .ProjectTo<TeamDto>(_mapper.ConfigurationProvider)
+                .FirstAsync();
         }
 
         public async Task<bool> DeleteTeamAsync(int id) {

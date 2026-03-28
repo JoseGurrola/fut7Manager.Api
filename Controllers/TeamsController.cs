@@ -48,10 +48,10 @@ namespace fut7Manager.Api.Controllers {
         public async Task<IActionResult> UpdateTeam(int id, UpdateTeamDto dto) {
             var result = await _teamService.UpdateTeamAsync(id, dto);
 
-            if (!result)
+            if (result == null)
                 return NotFound();
 
-            return NoContent();
+            return Ok(result);
         }
 
         [HttpDelete("{id}")]

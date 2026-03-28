@@ -11,5 +11,7 @@
         public int GoalsFor { get; set; }
 
         public int GoalsAgainst { get; set; }
+
+        public int GroupId { get; set; }
     }
 }

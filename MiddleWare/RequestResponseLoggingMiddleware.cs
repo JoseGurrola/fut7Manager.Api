@@ -22,7 +22,12 @@ namespace fut7Manager.Api.MiddleWare {
 
             context.Request.Body.Position = 0;
 
-            _logger.LogInformation($"HTTP {context.Request.Method} {context.Request.Path} Body:\n{FormatJson(requestBody)}");
+            var queryString = context.Request.QueryString.HasValue
+                ? context.Request.QueryString.Value
+                : string.Empty;
+
+            _logger.LogInformation(
+                $"HTTP {context.Request.Method} {context.Request.Path}{queryString} Body:\n{FormatJson(requestBody)}");
 
             var originalBodyStream = context.Response.Body;
 

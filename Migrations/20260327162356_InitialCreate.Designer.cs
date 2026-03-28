@@ -12,8 +12,8 @@ using fut7Manager.Data;
 namespace fut7Manager.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260323223114_InitialWithGroups")]
-    partial class InitialWithGroups
+    [Migration("20260327162356_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,7 +33,7 @@ namespace fut7Manager.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AwayGoals")
+                    b.Property<int?>("AwayGoals")
                         .HasColumnType("int");
 
                     b.Property<int>("AwayTeamId")
@@ -42,7 +42,7 @@ namespace fut7Manager.Api.Migrations
                     b.Property<int>("GroupId")
                         .HasColumnType("int");
 
-                    b.Property<int>("HomeGoals")
+                    b.Property<int?>("HomeGoals")
                         .HasColumnType("int");
 
                     b.Property<int>("HomeTeamId")
@@ -54,8 +54,11 @@ namespace fut7Manager.Api.Migrations
                     b.Property<string>("Location")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("MatchDate")
+                    b.Property<DateTime?>("MatchDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int?>("MatchdayId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -66,6 +69,8 @@ namespace fut7Manager.Api.Migrations
                     b.HasIndex("HomeTeamId");
 
                     b.HasIndex("LeagueId");
+
+                    b.HasIndex("MatchdayId");
 
                     b.ToTable("Matches");
                 });
@@ -101,14 +106,68 @@ namespace fut7Manager.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("InterGroupMatches")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsScheduleGenerated")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<decimal>("RegistrationFee")
+                        .HasColumnType("decimal(18,2)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Leagues");
+                });
+
+            modelBuilder.Entity("fut7Manager.Api.Models.Matchday", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("LeagueId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Number")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LeagueId");
+
+                    b.ToTable("Matchdays");
+                });
+
+            modelBuilder.Entity("fut7Manager.Api.Models.Payment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TeamId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeamId");
+
+                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("fut7Manager.Api.Models.Player", b =>
@@ -225,6 +284,10 @@ namespace fut7Manager.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("fut7Manager.Api.Models.Matchday", "Matchday")
+                        .WithMany("Matches")
+                        .HasForeignKey("MatchdayId");
+
                     b.Navigation("AwayTeam");
 
                     b.Navigation("Group");
@@ -232,6 +295,8 @@ namespace fut7Manager.Api.Migrations
                     b.Navigation("HomeTeam");
 
                     b.Navigation("League");
+
+                    b.Navigation("Matchday");
                 });
 
             modelBuilder.Entity("fut7Manager.Api.Models.Group", b =>
@@ -243,6 +308,28 @@ namespace fut7Manager.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("League");
+                });
+
+            modelBuilder.Entity("fut7Manager.Api.Models.Matchday", b =>
+                {
+                    b.HasOne("fut7Manager.Api.Models.League", "League")
+                        .WithMany("Matchdays")
+                        .HasForeignKey("LeagueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("League");
+                });
+
+            modelBuilder.Entity("fut7Manager.Api.Models.Payment", b =>
+                {
+                    b.HasOne("fut7Manager.Api.Models.Team", "Team")
+                        .WithMany("Payments")
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Team");
                 });
 
             modelBuilder.Entity("fut7Manager.Api.Models.Player", b =>
@@ -264,13 +351,15 @@ namespace fut7Manager.Api.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("fut7Manager.Api.Models.League", null)
+                    b.HasOne("fut7Manager.Api.Models.League", "League")
                         .WithMany("Teams")
                         .HasForeignKey("LeagueId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Group");
+
+                    b.Navigation("League");
                 });
 
             modelBuilder.Entity("fut7Manager.Api.Models.Group", b =>
@@ -282,13 +371,22 @@ namespace fut7Manager.Api.Migrations
                 {
                     b.Navigation("Groups");
 
+                    b.Navigation("Matchdays");
+
                     b.Navigation("Matches");
 
                     b.Navigation("Teams");
                 });
 
+            modelBuilder.Entity("fut7Manager.Api.Models.Matchday", b =>
+                {
+                    b.Navigation("Matches");
+                });
+
             modelBuilder.Entity("fut7Manager.Api.Models.Team", b =>
                 {
+                    b.Navigation("Payments");
+
                     b.Navigation("Players");
                 });
 #pragma warning restore 612, 618

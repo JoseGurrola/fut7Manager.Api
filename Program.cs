@@ -68,6 +68,7 @@ builder.Services.AddScoped<ITeamService, TeamService>();
 builder.Services.AddScoped<IFut7MatchService, Fut7MatchService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<IScheduleService, ScheduleService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 builder.Services.AddSwaggerGen(options => { // Configuración de Swagger (documentación de la API)
     options.SwaggerDoc("v1", new() { Title = "fut7Manager", Version = "v1" }); // Define un documento Swagger versión 1

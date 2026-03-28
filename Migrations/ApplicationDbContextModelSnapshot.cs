@@ -114,6 +114,9 @@ namespace fut7Manager.Api.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<decimal>("RegistrationFee")
+                        .HasColumnType("decimal(18,2)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Leagues");
@@ -138,6 +141,30 @@ namespace fut7Manager.Api.Migrations
                     b.HasIndex("LeagueId");
 
                     b.ToTable("Matchdays");
+                });
+
+            modelBuilder.Entity("fut7Manager.Api.Models.Payment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TeamId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeamId");
+
+                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("fut7Manager.Api.Models.Player", b =>
@@ -291,6 +318,17 @@ namespace fut7Manager.Api.Migrations
                     b.Navigation("League");
                 });
 
+            modelBuilder.Entity("fut7Manager.Api.Models.Payment", b =>
+                {
+                    b.HasOne("fut7Manager.Api.Models.Team", "Team")
+                        .WithMany("Payments")
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Team");
+                });
+
             modelBuilder.Entity("fut7Manager.Api.Models.Player", b =>
                 {
                     b.HasOne("fut7Manager.Api.Models.Team", "Team")
@@ -310,13 +348,15 @@ namespace fut7Manager.Api.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("fut7Manager.Api.Models.League", null)
+                    b.HasOne("fut7Manager.Api.Models.League", "League")
                         .WithMany("Teams")
                         .HasForeignKey("LeagueId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Group");
+
+                    b.Navigation("League");
                 });
 
             modelBuilder.Entity("fut7Manager.Api.Models.Group", b =>
@@ -342,6 +382,8 @@ namespace fut7Manager.Api.Migrations
 
             modelBuilder.Entity("fut7Manager.Api.Models.Team", b =>
                 {
+                    b.Navigation("Payments");
+
                     b.Navigation("Players");
                 });
 #pragma warning restore 612, 618

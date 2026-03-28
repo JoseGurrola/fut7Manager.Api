@@ -12,9 +12,41 @@ namespace fut7Manager.Api.Mapping {
             CreateMap<UpdatePlayerDto, Player>();
 
             // Team
-            CreateMap<Team, TeamDto>();
-            CreateMap<CreateTeamDto, Team>();
-            CreateMap<UpdateTeamDto, Team>();
+            CreateMap<Team, TeamDto>()
+                .ForMember(d => d.Paid,
+                    opt => opt.MapFrom(s => s.Payments.Sum(p => (decimal?)p.Amount) ?? 0))
+                .ForMember(d => d.Remaining,
+                    opt => opt.MapFrom(s =>
+                        (s.League != null ? s.League.RegistrationFee : 0) -
+                        (s.Payments.Sum(p => (decimal?)p.Amount) ?? 0)));
+
+            CreateMap<CreateTeamDto, Team>()
+                .ForMember(d => d.League, o => o.Ignore())
+                .ForMember(d => d.Group, o => o.Ignore())
+                .ForMember(d => d.Players, o => o.Ignore())
+                .ForMember(d => d.Payments, o => o.Ignore())
+                .ForMember(d => d.PositionTable, o => o.MapFrom(_ => 0))
+                .ForMember(d => d.Points, o => o.MapFrom(_ => 0))
+                .ForMember(d => d.GoalsFor, o => o.MapFrom(_ => 0))
+                .ForMember(d => d.GoalsAgainst, o => o.MapFrom(_ => 0));
+
+            CreateMap<UpdateTeamDto, Team>()
+                .ForMember(d => d.Id, o => o.Ignore())
+                .ForMember(d => d.LeagueId, o => o.Ignore())
+                //.ForMember(d => d.GroupId, o => o.Ignore())  ❌ quitar
+
+                .ForMember(d => d.League, o => o.Ignore())
+                .ForMember(d => d.Group, o => o.Ignore())
+                .ForMember(d => d.Players, o => o.Ignore())
+                .ForMember(d => d.Payments, o => o.Ignore())
+
+                .ForMember(d => d.Name, o => o.MapFrom(s => s.Name))
+                .ForMember(d => d.LogoUrl, o => o.MapFrom(s => s.LogoUrl))
+                .ForMember(d => d.PositionTable, o => o.MapFrom(s => s.PositionTable))
+                .ForMember(d => d.Points, o => o.MapFrom(s => s.Points))
+                .ForMember(d => d.GoalsFor, o => o.MapFrom(s => s.GoalsFor))
+                .ForMember(d => d.GoalsAgainst, o => o.MapFrom(s => s.GoalsAgainst))
+                .ForMember(d => d.GroupId, o => o.MapFrom(s => s.GroupId));
 
             // League
             CreateMap<League, LeagueDto>();
@@ -27,6 +59,8 @@ namespace fut7Manager.Api.Mapping {
                 .ForMember(dest => dest.AwayTeamName,
                     opt => opt.MapFrom(src => src.AwayTeam.Name));
 
+            
+
             CreateMap<CreateFut7MatchDto, Fut7Match>();
             CreateMap<UpdateFut7MatchDto, Fut7Match>();
 
@@ -37,6 +71,14 @@ namespace fut7Manager.Api.Mapping {
 
             CreateMap<Fut7Match, Fut7MatchDto>();
             CreateMap<Matchday, MatchdayDto>();
+
+            //Payment
+            CreateMap<CreatePaymentDto, Payment>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Date, opt => opt.Ignore());
+            CreateMap<Payment, PaymentDto>()
+                .ForMember(d => d.TeamName,
+                    opt => opt.MapFrom(s => s.Team.Name));
         }
     }
 }

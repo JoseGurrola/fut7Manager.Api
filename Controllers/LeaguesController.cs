@@ -15,12 +15,12 @@ namespace fut7Manager.Api.Controllers {
     public class LeaguesController : ControllerBase {
         private readonly ILeagueService _leagueService;
         private readonly IScheduleService _scheduleService;
-
         private readonly IMapper _mapper;
 
         public LeaguesController(ILeagueService leagueService, IScheduleService scheduleService, IMapper mapper) {
             _leagueService = leagueService;
             _scheduleService = scheduleService;
+            _mapper = mapper;
         }
 
         [HttpGet]

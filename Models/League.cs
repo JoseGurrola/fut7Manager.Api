@@ -17,5 +17,7 @@ namespace fut7Manager.Api.Models {
 
         public bool IsScheduleGenerated { get; set; }
         public bool InterGroupMatches { get; set; }  // true = A vs B permitido
+
+        public decimal RegistrationFee { get; set; }  // costo de inscripción
     }
 }

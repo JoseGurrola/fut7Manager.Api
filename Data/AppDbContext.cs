@@ -19,8 +19,18 @@ namespace fut7Manager.Data {
 
         public DbSet<Matchday> Matchdays { get; set; }
 
+        public DbSet<Payment> Payments { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<League>()
+                .Property(l => l.RegistrationFee)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Payment>()
+                .Property(p => p.Amount)
+                .HasPrecision(18, 2);
 
             modelBuilder.Entity<Fut7Match>()
                 .HasOne(m => m.HomeTeam)
@@ -56,6 +66,12 @@ namespace fut7Manager.Data {
                 .HasOne(md => md.League)
                 .WithMany(l => l.Matchdays)
                 .HasForeignKey(md => md.LeagueId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.Team)
+                .WithMany(t => t.Payments)
+                .HasForeignKey(p => p.TeamId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }
