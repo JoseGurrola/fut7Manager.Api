@@ -73,6 +73,22 @@ namespace fut7Manager.Data {
                 .WithMany(t => t.Payments)
                 .HasForeignKey(p => p.TeamId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Team>(entity =>
+            {
+                entity.HasOne(t => t.Group)
+                    .WithMany(g => g.Teams)
+                    .HasForeignKey(t => t.GroupId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.Property(t => t.TeamManagerName)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(t => t.TeamManagerPhone)
+                    .IsRequired()
+                    .HasMaxLength(10);
+            });
         }
     }
 }

@@ -14,11 +14,17 @@
 
         public int GoalsAgainst { get; set; }
 
+        public string TeamManagerName { get; set; } = default!;
+
+        public string TeamManagerPhone { get; set; } = default!;
+
         public int LeagueId { get; set; }
 
         public int GroupId { get; set; }
 
         public decimal Paid { get; set; }
         public decimal Remaining { get; set; }
+
+        
     }
 }

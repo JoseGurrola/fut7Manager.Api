@@ -29,5 +29,9 @@ namespace fut7Manager.Api.Models {
         public ICollection<Player> Players { get; set; } = new List<Player>();
 
         public List<Payment> Payments { get; set; } = new List<Payment>();
+
+        public string TeamManagerName { get; set; } = default!;
+
+        public string TeamManagerPhone { get; set; } = default!;
     }
 }

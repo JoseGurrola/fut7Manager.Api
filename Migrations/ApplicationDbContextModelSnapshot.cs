@@ -115,6 +115,7 @@ namespace fut7Manager.Api.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<decimal>("RegistrationFee")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -152,6 +153,7 @@ namespace fut7Manager.Api.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("Date")
@@ -245,6 +247,16 @@ namespace fut7Manager.Api.Migrations
 
                     b.Property<int>("PositionTable")
                         .HasColumnType("int");
+
+                    b.Property<string>("TeamManagerName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("TeamManagerPhone")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.HasKey("Id");
 
