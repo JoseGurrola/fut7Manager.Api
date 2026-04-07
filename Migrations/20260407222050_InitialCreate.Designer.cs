@@ -12,8 +12,8 @@ using fut7Manager.Data;
 namespace fut7Manager.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260401195141_Initial")]
-    partial class Initial
+    [Migration("20260407222050_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -120,6 +120,9 @@ namespace fut7Manager.Api.Migrations
                     b.Property<decimal>("RegistrationFee")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

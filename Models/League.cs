@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using fut7Manager.Api.Helpers;
+using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 
 namespace fut7Manager.Api.Models {
@@ -19,5 +20,7 @@ namespace fut7Manager.Api.Models {
         public bool InterGroupMatches { get; set; }  // true = A vs B permitido
 
         public decimal RegistrationFee { get; set; }  // costo de inscripción
+
+        public LeagueStatus Status { get; set; } = LeagueStatus.Upcoming;
     }
 }
