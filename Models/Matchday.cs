@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.RegularExpressions;
 
 namespace fut7Manager.Api.Models {
     public class Matchday {
@@ -8,5 +9,8 @@ namespace fut7Manager.Api.Models {
 
         public League League { get; set; } = default!;
         public ICollection<Fut7Match> Matches { get; set; } = new List<Fut7Match>();
+
+        [NotMapped]
+        public List<string> RestingTeamNames { get; set; } = new();
     }
 }

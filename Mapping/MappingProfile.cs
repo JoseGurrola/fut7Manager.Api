@@ -74,7 +74,9 @@ namespace fut7Manager.Api.Mapping {
             CreateMap<CreateGroupDto, Group>();
 
             CreateMap<Fut7Match, Fut7MatchDto>();
-            CreateMap<Matchday, MatchdayDto>();
+            CreateMap<Matchday, MatchdayDto>()
+                .ForMember(dest => dest.RestingTeamNames,
+                    opt => opt.MapFrom(src => src.RestingTeamNames));
 
             //Payment
             CreateMap<CreatePaymentDto, Payment>()
