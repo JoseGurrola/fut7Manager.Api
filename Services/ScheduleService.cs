@@ -189,13 +189,159 @@ namespace fut7Manager.Api.Services {
 
                 matchdays.Add(matchday);
 
-                // 🔄 rotación
+                //rotación
                 var last = workingTeams[^1];
                 workingTeams.RemoveAt(workingTeams.Count - 1);
                 workingTeams.Insert(1, last);
             }
 
             return matchdays;
+        }
+
+        public async Task<LeagueDashboardDto> GetDashboardAsync(int leagueId) {
+            // =========================
+            // 🔹 1. Jornada actual
+            // =========================
+            var currentMatchday = await _context.Matchdays
+                .Include(md => md.Matches)
+                    .ThenInclude(m => m.HomeTeam)
+                .Include(md => md.Matches)
+                    .ThenInclude(m => m.AwayTeam)
+                .Where(md => md.LeagueId == leagueId)
+                .OrderBy(md => md.Number)
+                .FirstOrDefaultAsync(md =>
+                    md.Matches.Any(m => m.HomeGoals == null || m.AwayGoals == null)
+                );
+
+            MatchdayDto? matchdayDto = null;
+
+            if (currentMatchday != null) {
+                var allTeams = await _context.Teams
+                    .Where(t => t.LeagueId == leagueId)
+                    .ToListAsync();
+
+                currentMatchday.RestingTeamNames = allTeams
+                    .Where(t => !currentMatchday.Matches.Any(m =>
+                        m.HomeTeamId == t.Id || m.AwayTeamId == t.Id))
+                    .Select(t => t.Name)
+                    .ToList();
+
+                matchdayDto = _mapper.Map<MatchdayDto>(currentMatchday);
+            }
+
+            // =========================
+            // 🔹 2. Equipos (con grupo)
+            // =========================
+            var teams = await _context.Teams
+                .Where(t => t.LeagueId == leagueId)
+                .ToListAsync();
+
+            // =========================
+            // 🔹 3. Partidos jugados
+            // =========================
+            var matches = await _context.Matches
+                .Where(m => m.LeagueId == leagueId &&
+                            m.HomeGoals != null &&
+                            m.AwayGoals != null)
+                .ToListAsync();
+
+            // =========================
+            // 🔹 4. Agrupar por grupo
+            // =========================
+            var groupedStandings = new List<GroupStandingDto>();
+
+            var teamsByGroup = teams
+                .GroupBy(t => t.GroupId)
+                .ToList();
+
+            foreach (var group in teamsByGroup) {
+                var groupId = group.Key;
+
+                // 🔹 Inicializar standings del grupo
+                var standingsDict = group.ToDictionary(
+                    t => t.Id,
+                    t => new StandingDto {
+                        TeamId = t.Id,
+                        TeamName = t.Name,
+                        Played = 0,
+                        Won = 0,
+                        Draw = 0,
+                        Lost = 0,
+                        GoalsFor = 0,
+                        GoalsAgainst = 0,
+                        Points = 0
+                    });
+
+                // 🔹 Filtrar partidos del grupo
+                var groupMatches = matches
+                    .Where(m => m.GroupId == groupId)
+                    .ToList();
+
+                // 🔹 Procesar partidos
+                foreach (var m in groupMatches) {
+                    var home = standingsDict[m.HomeTeamId];
+                    var away = standingsDict[m.AwayTeamId];
+
+                    home.Played++;
+                    away.Played++;
+
+                    home.GoalsFor += m.HomeGoals.Value;
+                    home.GoalsAgainst += m.AwayGoals.Value;
+
+                    away.GoalsFor += m.AwayGoals.Value;
+                    away.GoalsAgainst += m.HomeGoals.Value;
+
+                    if (m.HomeGoals > m.AwayGoals) {
+                        home.Won++; home.Points += 3;
+                        away.Lost++;
+                    } else if (m.HomeGoals < m.AwayGoals) {
+                        away.Won++; away.Points += 3;
+                        home.Lost++;
+                    } else {
+                        home.Draw++; away.Draw++;
+                        home.Points++; away.Points++;
+                    }
+                }
+
+                // 🔹 Ordenar
+                var standings = standingsDict.Values
+                    .OrderByDescending(t => t.Points)
+                    .ThenByDescending(t => t.GoalDifference)
+                    .ThenByDescending(t => t.GoalsFor)
+                    .ThenBy(t => t.TeamName)
+                    .ToList();
+
+                // 🔹 Posiciones
+                for (int i = 0; i < standings.Count; i++) {
+                    standings[i].Position = i + 1;
+                }
+
+                var groups = await _context.Groups
+                    .Where(g => g.LeagueId == leagueId)
+                    .ToListAsync();
+
+                groupedStandings.Add(new GroupStandingDto {
+                    GroupName = groups.FirstOrDefault(g => g.Id == groupId)?.Name ?? $"Grupo {groupId}",
+                    Standings = standings
+                });
+            }
+
+            // =========================
+            // 🔹 5. (Opcional) global fallback
+            // =========================
+            var flatStandings = groupedStandings
+                .SelectMany(g => g.Standings)
+                .OrderBy(s => s.Position)
+                .ToList();
+
+            // =========================
+            // 🔹 6. Resultado
+            // =========================
+            return new LeagueDashboardDto {
+                CurrentMatchday = matchdayDto,
+                GroupedStandings = groupedStandings,
+                Standings = flatStandings // fallback
+            };
         }
     }
 }

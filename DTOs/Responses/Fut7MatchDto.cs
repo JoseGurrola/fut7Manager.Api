@@ -10,16 +10,18 @@
 
         public string AwayTeamName { get; set; } = default!;
 
-        //public int HomeGoals { get; set; }
+        public int? HomeGoals { get; set; }
 
-        //public int AwayGoals { get; set; }
+        public int? AwayGoals { get; set; }
 
-        //public DateTime MatchDate { get; set; }
+        public DateTime? MatchDate { get; set; }
 
-        //public string? Location { get; set; }
+        public string? Location { get; set; }
 
         public int? MatchdayId { get; set; }
         public int GroupId { get; set; }
         public int LeagueId { get; set; }
+
+        public int MatchdayNumber { get; set; }
     }
 }

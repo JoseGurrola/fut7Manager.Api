@@ -81,5 +81,11 @@ namespace fut7Manager.Api.Controllers {
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpGet("{leagueId}/dashboard")]
+        public async Task<IActionResult> GetDashboard(int leagueId) {
+            var result = await _scheduleService.GetDashboardAsync(leagueId);
+            return Ok(result);
+        }
     }
 }
