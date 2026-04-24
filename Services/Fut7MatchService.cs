@@ -34,10 +34,26 @@ namespace fut7Manager.Api.Services {
             var dtoQuery = query
                 .ProjectTo<Fut7MatchDto>(_mapper.ConfigurationProvider);
 
-            return await dtoQuery.ToPagedResultAsync(
-                q => q.OrderBy(x => x.MatchdayNumber).ThenBy(x => x.Id),
-                pagination.PageNumber,
-                pagination.PageSize);
+            if (pagination.PageSize == 0) {
+                //SIN PAGINADO
+                var items = await dtoQuery
+                    .OrderBy(x => x.MatchdayNumber)
+                    .ThenBy(x => x.Id)
+                    .ToListAsync();
+
+                return new PagedResult<Fut7MatchDto> {
+                    Items = items,
+                    PageNumber = 1,
+                    PageSize = items.Count == 0 ? 1 : items.Count, // evita división entre 0
+                    TotalCount = items.Count
+                };
+            } else {
+                //CON PAGINADO
+                return await dtoQuery.ToPagedResultAsync(
+                    q => q.OrderBy(x => x.MatchdayNumber).ThenBy(x => x.Id),
+                    pagination.PageNumber,
+                    pagination.PageSize);
+            }
         }
 
         public async Task<Fut7MatchDto?> GetMatchByIdAsync(int id) {
