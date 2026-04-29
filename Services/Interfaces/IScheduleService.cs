@@ -7,5 +7,7 @@ namespace fut7Manager.Api.Services.Interfaces {
 
         //Task<MatchdayDto?> GetNextMatchdayAsync(int leagueId);
         Task<LeagueDashboardDto> GetDashboardAsync(int leagueId);
+
+        Task<StandingsResponseDto> GetStandingsAsync(int leagueId);
     }
 }

@@ -87,5 +87,11 @@ namespace fut7Manager.Api.Controllers {
             var result = await _scheduleService.GetDashboardAsync(leagueId);
             return Ok(result);
         }
+
+        [HttpGet("{leagueId}/standings")]
+        public async Task<IActionResult> GetStandings(int leagueId) {
+            var result = await _scheduleService.GetStandingsAsync(leagueId);
+            return Ok(result);
+        }
     }
 }

@@ -279,11 +279,17 @@ namespace fut7Manager.Api.Services {
 
                 // 🔹 Procesar partidos
                 foreach (var m in groupMatches) {
+                    if (!standingsDict.ContainsKey(m.HomeTeamId) || !standingsDict.ContainsKey(m.AwayTeamId))
+                        continue;
+
                     var home = standingsDict[m.HomeTeamId];
                     var away = standingsDict[m.AwayTeamId];
 
                     home.Played++;
                     away.Played++;
+
+                    if (!m.HomeGoals.HasValue || !m.AwayGoals.HasValue)
+                        continue;
 
                     home.GoalsFor += m.HomeGoals.Value;
                     home.GoalsAgainst += m.AwayGoals.Value;
@@ -343,5 +349,136 @@ namespace fut7Manager.Api.Services {
                 Standings = flatStandings // fallback
             };
         }
+
+        public async Task<StandingsResponseDto> GetStandingsAsync(int leagueId) {
+            // =========================
+            // 🔹 1. Equipos
+            // =========================
+            var teams = await _context.Teams
+                .Where(t => t.LeagueId == leagueId)
+                .ToListAsync();
+
+            // =========================
+            // 🔹 2. Partidos jugados
+            // =========================
+            var matches = await _context.Matches
+                .Where(m => m.LeagueId == leagueId &&
+                            m.HomeGoals != null &&
+                            m.AwayGoals != null)
+                .OrderByDescending(m => m.MatchDate.HasValue)
+                .ThenByDescending(m => m.MatchDate)
+                .ThenByDescending(m => m.Id)
+                .ToListAsync();
+
+            // =========================
+            // 🔹 3. Grupos
+            // =========================
+            var groups = await _context.Groups
+                .Where(g => g.LeagueId == leagueId)
+                .ToListAsync();
+
+            var groupedStandings = new List<GroupStandingDto>();
+
+            var teamsByGroup = teams.GroupBy(t => t.GroupId);
+
+            foreach (var group in teamsByGroup) {
+                var groupId = group.Key;
+
+                var standingsDict = group.ToDictionary(
+                    t => t.Id,
+                    t => new StandingDto {
+                        TeamId = t.Id,
+                        TeamName = t.Name,
+                        Played = 0,
+                        Won = 0,
+                        Draw = 0,
+                        Lost = 0,
+                        GoalsFor = 0,
+                        GoalsAgainst = 0,
+                        Points = 0,
+                        Last5Results = new List<string>()
+                    });
+
+                var groupMatches = matches
+                    .Where(m => m.GroupId == groupId)
+                    .ToList();
+
+                foreach (var m in groupMatches) {
+                    var home = standingsDict[m.HomeTeamId];
+                    var away = standingsDict[m.AwayTeamId];
+
+                    home.Played++;
+                    away.Played++;
+
+                    home.GoalsFor += m.HomeGoals.Value;
+                    home.GoalsAgainst += m.AwayGoals.Value;
+
+                    away.GoalsFor += m.AwayGoals.Value;
+                    away.GoalsAgainst += m.HomeGoals.Value;
+
+                    // 🔹 Resultado
+                    if (m.HomeGoals > m.AwayGoals) {
+                        home.Won++; home.Points += 3;
+                        away.Lost++;
+
+                        AddResult(home, "W");
+                        AddResult(away, "L");
+                    } else if (m.HomeGoals < m.AwayGoals) {
+                        away.Won++; away.Points += 3;
+                        home.Lost++;
+
+                        AddResult(home, "L");
+                        AddResult(away, "W");
+                    } else {
+                        home.Draw++; away.Draw++;
+                        home.Points++; away.Points++;
+
+                        AddResult(home, "D");
+                        AddResult(away, "D");
+                    }
+                }
+
+                var standings = standingsDict.Values
+                    .OrderByDescending(t => t.Points)
+                    .ThenByDescending(t => t.GoalDifference)
+                    .ThenByDescending(t => t.GoalsFor)
+                    .ThenBy(t => t.TeamName)
+                    .ToList();
+
+                for (int i = 0; i < standings.Count; i++)
+                    standings[i].Position = i + 1;
+
+                groupedStandings.Add(new GroupStandingDto {
+                    GroupName = groups.FirstOrDefault(g => g.Id == groupId)?.Name ?? $"Grupo {groupId}",
+                    Standings = standings
+                });
+            }
+
+            // =========================
+            // 🔹 TABLA GENERAL
+            // =========================
+            var generalStandings = groupedStandings
+                .SelectMany(g => g.Standings)
+                .OrderByDescending(t => t.Points)
+                .ThenByDescending(t => t.GoalDifference)
+                .ThenByDescending(t => t.GoalsFor)
+                .ThenBy(t => t.TeamName)
+                .ToList();
+
+            for (int i = 0; i < generalStandings.Count; i++)
+                generalStandings[i].Position = i + 1;
+
+            return new StandingsResponseDto {
+                GroupedStandings = groupedStandings,
+                Standings = generalStandings
+            };
+        }
+        private void AddResult(StandingDto team, string result) {
+            team.Last5Results.Insert(0, result); // más reciente primero
+
+            if (team.Last5Results.Count > 5)
+                team.Last5Results.RemoveAt(team.Last5Results.Count - 1);
+        }
     }
-}
+
+    }
