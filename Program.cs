@@ -69,6 +69,7 @@ builder.Services.AddScoped<IFut7MatchService, Fut7MatchService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<IScheduleService, ScheduleService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IFileStorageService,FileStorageService>();
 
 builder.Services.AddSwaggerGen(options => { // Configuración de Swagger (documentación de la API)
     options.SwaggerDoc("v1", new() { Title = "fut7Manager", Version = "v1" }); // Define un documento Swagger versión 1
@@ -121,9 +122,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 
 var app = builder.Build(); // Construye la aplicación con toda la configuración anterior
 
+app.UseStaticFiles(); // para las imagenes
+
 app.UseAuthentication(); // Middleware que valida el JWT en cada request
 
 app.UseAuthorization(); // Middleware que aplica las reglas de autorización ([Authorize])
+
+
 
 app.UseMiddleware<fut7Manager.Middleware.ExceptionMiddleware>(); // Middleware personalizado para manejar excepciones globalmente
 app.UseMiddleware<RequestResponseLoggingMiddleware>();

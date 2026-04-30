@@ -7,5 +7,7 @@ namespace fut7Manager.Api.DTOs.Requests {
         public decimal RegistrationFee { get; set; }
 
         public LeagueStatus Status { get; set; } = LeagueStatus.Upcoming;
+
+        public string? LogoUrl { get; set; }
     }
 }

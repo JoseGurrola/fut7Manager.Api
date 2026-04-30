@@ -396,7 +396,8 @@ namespace fut7Manager.Api.Services {
                         GoalsFor = 0,
                         GoalsAgainst = 0,
                         Points = 0,
-                        Last5Results = new List<string>()
+                        Last5Results = new List<string>(),
+                        LogoUrl = t.LogoUrl
                     });
 
                 var groupMatches = matches

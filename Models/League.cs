@@ -22,5 +22,7 @@ namespace fut7Manager.Api.Models {
         public decimal RegistrationFee { get; set; }  // costo de inscripción
 
         public LeagueStatus Status { get; set; } = LeagueStatus.Upcoming;
+
+        public string? LogoUrl { get; set; }
     }
 }

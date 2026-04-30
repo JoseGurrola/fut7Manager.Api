@@ -17,5 +17,7 @@
         public int Points { get; set; }
 
         public List<string> Last5Results { get; set; } = new();
+
+        public string? LogoUrl { get; set; }
     }
 }

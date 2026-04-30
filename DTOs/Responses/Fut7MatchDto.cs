@@ -23,5 +23,8 @@
         public int LeagueId { get; set; }
 
         public int MatchdayNumber { get; set; }
+
+        public string? HomeTeamLogo { get; set; }
+        public string? AwayTeamLogo { get; set; }
     }
 }

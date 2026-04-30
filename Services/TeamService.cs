@@ -19,6 +19,37 @@ namespace fut7Manager.Api.Services {
             _mapper = mapper;
         }
 
+        private void DeleteImage(string? url) {
+            if (string.IsNullOrWhiteSpace(url))
+                return;
+
+            try {
+                var uri = new Uri(url);
+
+                var relativePath = uri.LocalPath.TrimStart('/');
+
+                var fullPath = Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    "wwwroot",
+                    relativePath.Replace('/', Path.DirectorySeparatorChar)
+                );
+
+                if (File.Exists(fullPath)) {
+                    File.Delete(fullPath);
+                }
+            }
+            catch {
+                // opcional: loggear
+            }
+        }
+
+        private bool IsLocalImage(string? url) {
+            if (string.IsNullOrEmpty(url))
+                return false;
+
+            return url.Contains("/images/");
+        }
+
         public async Task<PagedResult<TeamDto>> GetTeamsAsync(int? leagueId, PaginationParams pagination) {
             var query = _context.Teams
                 .AsNoTracking()
@@ -63,6 +94,10 @@ namespace fut7Manager.Api.Services {
             if (team == null)
                 return null;
 
+            if (team.LogoUrl != dto.LogoUrl && IsLocalImage(team.LogoUrl)) {
+                DeleteImage(team.LogoUrl);
+            }
+
             _mapper.Map(dto, team);
 
             await _context.SaveChangesAsync();
@@ -78,6 +113,8 @@ namespace fut7Manager.Api.Services {
 
             if (team == null)
                 return false;
+
+            DeleteImage(team.LogoUrl); // 🔥 importante
 
             _context.Teams.Remove(team);
             await _context.SaveChangesAsync();

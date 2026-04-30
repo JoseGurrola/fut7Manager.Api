@@ -23,6 +23,8 @@ namespace fut7Manager.Api.Services {
             var query = _context.Matches
                 .AsNoTracking()
                 .Include(m => m.Matchday)
+                 .Include(m => m.HomeTeam)    
+                 .Include(m => m.AwayTeam)
                 .AsQueryable();
 
             if (leagueId.HasValue) //filtro por liga
@@ -31,8 +33,28 @@ namespace fut7Manager.Api.Services {
             if (teamId.HasValue) //filtro por team
                 query = query.Where(m => m.HomeTeamId == teamId || m.AwayTeamId == teamId);
 
-            var dtoQuery = query
-                .ProjectTo<Fut7MatchDto>(_mapper.ConfigurationProvider);
+            var dtoQuery = query.Select(m => new Fut7MatchDto {
+                Id = m.Id,
+                HomeTeamId = m.HomeTeamId,
+                AwayTeamId = m.AwayTeamId,
+
+                HomeTeamName = m.HomeTeam.Name,
+                AwayTeamName = m.AwayTeam.Name,
+
+                HomeTeamLogo = m.HomeTeam.LogoUrl,
+                AwayTeamLogo = m.AwayTeam.LogoUrl,
+
+                HomeGoals = m.HomeGoals,
+                AwayGoals = m.AwayGoals,
+                MatchDate = m.MatchDate,
+                Location = m.Location,
+
+                MatchdayId = m.MatchdayId,
+                MatchdayNumber = m.Matchday != null ? m.Matchday.Number : 0,
+
+                GroupId = m.GroupId,
+                LeagueId = m.LeagueId
+            });
 
             if (pagination.PageSize == 0) {
                 //SIN PAGINADO

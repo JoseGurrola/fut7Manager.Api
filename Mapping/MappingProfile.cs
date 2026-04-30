@@ -55,6 +55,7 @@ namespace fut7Manager.Api.Mapping {
             // League
             CreateMap<League, LeagueDto>();
             CreateMap<CreateLeagueDto, League>();
+            CreateMap<LeagueDto, League>();
 
             // Match
             CreateMap<Fut7Match, Fut7MatchDto>()
@@ -63,7 +64,11 @@ namespace fut7Manager.Api.Mapping {
                 .ForMember(dest => dest.AwayTeamName,
                     opt => opt.MapFrom(src => src.AwayTeam.Name))
                 .ForMember(dest => dest.MatchdayNumber,
-                    opt => opt.MapFrom(src => src.Matchday != null ? src.Matchday.Number : 0));
+                    opt => opt.MapFrom(src => src.Matchday != null ? src.Matchday.Number : 0))
+                .ForMember(dest => dest.HomeTeamLogo,
+                    opt => opt.MapFrom(src => src.HomeTeam.LogoUrl))
+                .ForMember(dest => dest.AwayTeamLogo,
+                    opt => opt.MapFrom(src => src.AwayTeam.LogoUrl));
 
 
 
