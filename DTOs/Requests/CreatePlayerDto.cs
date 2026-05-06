@@ -8,9 +8,11 @@ namespace fut7Manager.Api.DTOs.Requests {
 
         public int JerseyNumber { get; set; }
 
-        public DateTime DateOfBirth { get; set; }
+        public DateTime? DateOfBirth { get; set; }
 
         public string? Phone { get; set; }
+
+        public bool Active { get; set; }
 
         public PlayerPosition Position { get; set; } = default!;
 

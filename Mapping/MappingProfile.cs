@@ -7,7 +7,12 @@ namespace fut7Manager.Api.Mapping {
     public class MappingProfile : Profile {
         public MappingProfile() {
             // Player
-            CreateMap<Player, PlayerDto>();
+            CreateMap<Player, PlayerDto>()
+                .ForMember(dest => dest.TeamName,
+                    opt => opt.MapFrom(src => src.Team.Name))
+                .ForMember(dest => dest.TeamLogoUrl,
+                    opt => opt.MapFrom(src => src.Team.LogoUrl));
+
             CreateMap<CreatePlayerDto, Player>();
             CreateMap<UpdatePlayerDto, Player>();
 

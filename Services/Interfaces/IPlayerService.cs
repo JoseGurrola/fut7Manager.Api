@@ -9,7 +9,7 @@ namespace fut7Manager.Api.Services.Interfaces {
 
         Task<PlayerDto> CreatePlayerAsync(CreatePlayerDto dto);
 
-        Task<bool> UpdatePlayerAsync(int id, UpdatePlayerDto dto);
+        Task<PlayerDto?> UpdatePlayerAsync(int id, UpdatePlayerDto dto);
 
         Task<bool> DeletePlayerAsync(int id);
     }

@@ -52,22 +52,31 @@ namespace fut7Manager.Api.Services {
             var player = _mapper.Map<Player>(dto);
 
             _context.Players.Add(player);
+
             await _context.SaveChangesAsync();
+
+            await _context.Entry(player)
+                .Reference(p => p.Team)
+                .LoadAsync();
 
             return _mapper.Map<PlayerDto>(player);
         }
 
-        public async Task<bool> UpdatePlayerAsync(int id, UpdatePlayerDto dto) {
+        public async Task<PlayerDto?> UpdatePlayerAsync(int id, UpdatePlayerDto dto) {
             var player = await _context.Players.FindAsync(id);
 
             if (player == null)
-                return false;
+                return null;
 
             _mapper.Map(dto, player);
 
             await _context.SaveChangesAsync();
 
-            return true;
+            await _context.Entry(player)
+                .Reference(p => p.Team)
+                .LoadAsync();
+
+            return _mapper.Map<PlayerDto>(player);
         }
 
         public async Task<bool> DeletePlayerAsync(int id) {

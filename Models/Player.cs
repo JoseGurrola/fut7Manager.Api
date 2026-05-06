@@ -16,7 +16,7 @@ namespace fut7Manager.Api.Models {
 
         public int JerseyNumber { get; set; }
 
-        public DateTime DateOfBirth { get; set; }
+        public DateTime? DateOfBirth { get; set; }
 
         [MaxLength(20)]
         public string? Phone { get; set; }

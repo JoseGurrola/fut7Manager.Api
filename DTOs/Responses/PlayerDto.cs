@@ -8,7 +8,7 @@ namespace fut7Manager.Api.DTOs.Responses {
 
         public int JerseyNumber { get; set; }
 
-        public DateTime DateOfBirth { get; set; }
+        public DateTime? DateOfBirth { get; set; }
 
         public string? Phone { get; set; }
 
@@ -21,5 +21,8 @@ namespace fut7Manager.Api.DTOs.Responses {
         public bool Active { get; set; }
 
         public int TeamId { get; set; }
+
+        public string TeamName { get; set; } = default!;
+        public string TeamLogoUrl { get; set; } = default!;
     }
 }

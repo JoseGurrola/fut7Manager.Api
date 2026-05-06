@@ -48,13 +48,13 @@ namespace fut7Manager.Controllers {
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdatePlayer(int id, UpdatePlayerDto dto) {
-            var result = await _playerService.UpdatePlayerAsync(id, dto);
+        public async Task<ActionResult<PlayerDto>> UpdatePlayer(int id, UpdatePlayerDto dto) {
+            var player = await _playerService.UpdatePlayerAsync(id, dto);
 
-            if (!result)
+            if (player == null)
                 return NotFound();
 
-            return NoContent();
+            return Ok(player);
         }
 
         [HttpDelete("{id}")]
