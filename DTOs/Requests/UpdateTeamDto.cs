@@ -23,6 +23,6 @@ namespace fut7Manager.Api.DTOs.Requests {
 
         public int GroupId { get; set; }
 
-       
+       public string TeamPrimaryColor { get; set; } = default!;
     }
 }

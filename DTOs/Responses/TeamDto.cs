@@ -25,6 +25,6 @@
         public decimal Paid { get; set; }
         public decimal Remaining { get; set; }
 
-        
+        public string TeamPrimaryColor { get; set; } = default!;
     }
 }

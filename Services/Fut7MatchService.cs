@@ -57,22 +57,27 @@ namespace fut7Manager.Api.Services {
             });
 
             if (pagination.PageSize == 0) {
-                //SIN PAGINADO
+
                 var items = await dtoQuery
-                    .OrderBy(x => x.MatchdayNumber)
+                    .OrderBy(x => x.MatchDate == null)
+                    .ThenBy(x => x.MatchDate)
+                    .ThenBy(x => x.MatchdayNumber)
                     .ThenBy(x => x.Id)
                     .ToListAsync();
 
                 return new PagedResult<Fut7MatchDto> {
                     Items = items,
                     PageNumber = 1,
-                    PageSize = items.Count == 0 ? 1 : items.Count, // evita división entre 0
+                    PageSize = items.Count == 0 ? 1 : items.Count,
                     TotalCount = items.Count
                 };
             } else {
-                //CON PAGINADO
+
                 return await dtoQuery.ToPagedResultAsync(
-                    q => q.OrderBy(x => x.MatchdayNumber).ThenBy(x => x.Id),
+                    q => q.OrderBy(x => x.MatchDate == null)
+                          .ThenBy(x => x.MatchDate)
+                          .ThenBy(x => x.MatchdayNumber)
+                          .ThenBy(x => x.Id),
                     pagination.PageNumber,
                     pagination.PageSize);
             }
@@ -94,17 +99,17 @@ namespace fut7Manager.Api.Services {
             return _mapper.Map<Fut7MatchDto>(match);
         }
 
-        public async Task<bool> UpdateMatchAsync(int id, UpdateFut7MatchDto dto) {
+        public async Task<Fut7MatchDto?> UpdateMatchAsync(int id, UpdateFut7MatchDto dto) {
             var match = await _context.Matches.FindAsync(id);
 
             if (match == null)
-                return false;
+                return null;
 
             _mapper.Map(dto, match);
 
             await _context.SaveChangesAsync();
 
-            return true;
+            return _mapper.Map<Fut7MatchDto>(match);
         }
 
         public async Task<bool> DeleteMatchAsync(int id) {

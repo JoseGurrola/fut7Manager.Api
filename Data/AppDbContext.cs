@@ -88,6 +88,9 @@ namespace fut7Manager.Data {
                 entity.Property(t => t.TeamManagerPhone)
                     .IsRequired()
                     .HasMaxLength(10);
+                entity.Property(t => t.TeamPrimaryColor)
+                    .IsRequired()
+                    .HasMaxLength(8);
             });
         }
     }

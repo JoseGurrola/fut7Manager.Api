@@ -11,8 +11,9 @@ namespace fut7Manager.Api.Mapping {
                 .ForMember(dest => dest.TeamName,
                     opt => opt.MapFrom(src => src.Team.Name))
                 .ForMember(dest => dest.TeamLogoUrl,
-                    opt => opt.MapFrom(src => src.Team.LogoUrl));
-
+                    opt => opt.MapFrom(src => src.Team.LogoUrl))
+                .ForMember(dest => dest.TeamPrimaryColor,
+                    opt => opt.MapFrom(src => src.Team.TeamPrimaryColor));
             CreateMap<CreatePlayerDto, Player>();
             CreateMap<UpdatePlayerDto, Player>();
 
@@ -35,7 +36,8 @@ namespace fut7Manager.Api.Mapping {
                 .ForMember(d => d.GoalsFor, o => o.MapFrom(_ => 0))
                 .ForMember(d => d.GoalsAgainst, o => o.MapFrom(_ => 0))
                 .ForMember(d => d.TeamManagerName, o => o.MapFrom(s => s.TeamManagerName))
-                .ForMember(d => d.TeamManagerPhone, o => o.MapFrom(s => s.TeamManagerPhone));
+                .ForMember(d => d.TeamManagerPhone, o => o.MapFrom(s => s.TeamManagerPhone))
+                .ForMember(d => d.TeamPrimaryColor, o => o.MapFrom(s => s.TeamPrimaryColor));
 
             CreateMap<UpdateTeamDto, Team>()
                 .ForMember(d => d.Id, o => o.Ignore())
@@ -55,7 +57,8 @@ namespace fut7Manager.Api.Mapping {
                 .ForMember(d => d.GoalsAgainst, o => o.MapFrom(s => s.GoalsAgainst))
                 .ForMember(d => d.GroupId, o => o.MapFrom(s => s.GroupId))
                 .ForMember(d => d.TeamManagerName, o => o.MapFrom(s => s.TeamManagerName))
-                .ForMember(d => d.TeamManagerPhone, o => o.MapFrom(s => s.TeamManagerPhone));
+                .ForMember(d => d.TeamManagerPhone, o => o.MapFrom(s => s.TeamManagerPhone))
+                .ForMember(d => d.TeamPrimaryColor, o => o.MapFrom(s => s.TeamPrimaryColor));
 
             // League
             CreateMap<League, LeagueDto>();

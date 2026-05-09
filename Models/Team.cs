@@ -33,5 +33,8 @@ namespace fut7Manager.Api.Models {
         public string TeamManagerName { get; set; } = default!;
 
         public string TeamManagerPhone { get; set; } = default!;
+
+        public string TeamPrimaryColor { get; set; } = default!;
+
     }
 }

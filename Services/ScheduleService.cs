@@ -138,11 +138,13 @@ namespace fut7Manager.Api.Services {
 
             var matchdays = new List<Matchday>();
 
-            var random = new Random();
-
             var workingTeams = teams
                  .OrderBy(x => _random.Next())
                  .ToList();
+
+            // 🔹 contador de local/visita
+            var homeCounts = new Dictionary<int, int>();
+            var awayCounts = new Dictionary<int, int>();
 
             // Si es impar → agregar BYE
             if (workingTeams.Count % 2 != 0)
@@ -179,19 +181,51 @@ namespace fut7Manager.Api.Services {
                     if (home.Id == -1 || away.Id == -1)
                         continue;
 
+                    // 🔹 inicializar contadores
+                    if (!homeCounts.ContainsKey(home.Id))
+                        homeCounts[home.Id] = 0;
+
+                    if (!homeCounts.ContainsKey(away.Id))
+                        homeCounts[away.Id] = 0;
+
+                    if (!awayCounts.ContainsKey(home.Id))
+                        awayCounts[home.Id] = 0;
+
+                    if (!awayCounts.ContainsKey(away.Id))
+                        awayCounts[away.Id] = 0;
+
+                    // 🔹 balancear local/visitante
+                    int homeDiff =
+                        homeCounts[home.Id] - awayCounts[home.Id];
+
+                    int awayDiff =
+                        homeCounts[away.Id] - awayCounts[away.Id];
+
+                    // si home ya tiene más locales que away
+                    // invertir el partido
+                    if (homeDiff > awayDiff) {
+                        (home, away) = (away, home);
+                    }
+
                     matchday.Matches.Add(new Fut7Match {
                         LeagueId = leagueId,
                         GroupId = groupId ?? home.GroupId,
                         HomeTeamId = home.Id,
                         AwayTeamId = away.Id
                     });
+
+                    // 🔹 actualizar contadores
+                    homeCounts[home.Id]++;
+                    awayCounts[away.Id]++;
                 }
 
                 matchdays.Add(matchday);
 
-                //rotación
+                // 🔹 rotación round robin
                 var last = workingTeams[^1];
+
                 workingTeams.RemoveAt(workingTeams.Count - 1);
+
                 workingTeams.Insert(1, last);
             }
 
@@ -460,6 +494,19 @@ namespace fut7Manager.Api.Services {
             // =========================
             var generalStandings = groupedStandings
                 .SelectMany(g => g.Standings)
+                .Select(s => new StandingDto {
+                    TeamId = s.TeamId,
+                    TeamName = s.TeamName,
+                    Played = s.Played,
+                    Won = s.Won,
+                    Draw = s.Draw,
+                    Lost = s.Lost,
+                    GoalsFor = s.GoalsFor,
+                    GoalsAgainst = s.GoalsAgainst,
+                    Points = s.Points,
+                    Last5Results = s.Last5Results.ToList(),
+                    LogoUrl = s.LogoUrl
+                })
                 .OrderByDescending(t => t.Points)
                 .ThenByDescending(t => t.GoalDifference)
                 .ThenByDescending(t => t.GoalsFor)

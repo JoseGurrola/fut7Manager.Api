@@ -50,20 +50,36 @@ namespace fut7Manager.Api.Services {
             return url.Contains("/images/");
         }
 
-        public async Task<PagedResult<TeamDto>> GetTeamsAsync(int? leagueId, PaginationParams pagination) {
+        public async Task<PagedResult<TeamDto>> GetTeamsAsync(
+    int? leagueId,
+    PaginationParams pagination) {
             var query = _context.Teams
                 .AsNoTracking()
                 .AsQueryable();
 
-            // Filtrar por liga
             if (leagueId.HasValue)
                 query = query.Where(t => t.LeagueId == leagueId.Value);
 
-            // Proyección a DTO después de aplicar filtros
             var dtoQuery = query
                 .ProjectTo<TeamDto>(_mapper.ConfigurationProvider);
 
-            return await dtoQuery.ToPagedResultAsync(q => q.OrderBy(x => x.Id),
+            // SIN PAGINADO
+            if (pagination.PageSize == 0) {
+                var items = await dtoQuery
+                    .OrderBy(x => x.Id)
+                    .ToListAsync();
+
+                return new PagedResult<TeamDto> {
+                    Items = items,
+                    PageNumber = 1,
+                    PageSize = items.Count == 0 ? 1 : items.Count,
+                    TotalCount = items.Count
+                };
+            }
+
+            // CON PAGINADO
+            return await dtoQuery.ToPagedResultAsync(
+                q => q.OrderBy(x => x.Id),
                 pagination.PageNumber,
                 pagination.PageSize);
         }

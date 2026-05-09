@@ -12,6 +12,8 @@ namespace fut7Manager.Api.DTOs.Responses {
 
         public string? Phone { get; set; }
 
+        public string? Email { get; set; }
+
         public PlayerPosition Position { get; set; } = default!;
 
         public int Goals { get; set; }
@@ -24,5 +26,7 @@ namespace fut7Manager.Api.DTOs.Responses {
 
         public string TeamName { get; set; } = default!;
         public string TeamLogoUrl { get; set; } = default!;
+
+        public string TeamPrimaryColor { get; set; } = default!;
     }
 }

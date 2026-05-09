@@ -12,6 +12,8 @@ namespace fut7Manager.Api.DTOs.Requests {
 
         public string? Phone { get; set; }
 
+        public string? Email { get; set; }
+
         public PlayerPosition Position { get; set; } = default!;
 
         public bool Active { get; set; }

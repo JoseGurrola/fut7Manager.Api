@@ -1,6 +1,7 @@
 ﻿using fut7Manager.Api.DTOs.Requests;
 using fut7Manager.Api.DTOs.Responses;
 using fut7Manager.Api.Helpers;
+using Microsoft.AspNetCore.Mvc;
 
 namespace fut7Manager.Api.Services.Interfaces {
     public interface IFut7MatchService {
@@ -10,8 +11,7 @@ namespace fut7Manager.Api.Services.Interfaces {
 
         Task<Fut7MatchDto> CreateMatchAsync(CreateFut7MatchDto dto);
 
-        Task<bool> UpdateMatchAsync(int id, UpdateFut7MatchDto dto);
-
+        Task<Fut7MatchDto?> UpdateMatchAsync(int id, UpdateFut7MatchDto dto);
         Task<bool> DeleteMatchAsync(int id);
     }
 }

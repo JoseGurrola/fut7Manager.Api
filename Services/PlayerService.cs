@@ -19,22 +19,41 @@ namespace fut7Manager.Api.Services {
             _mapper = mapper;
         }
 
-        public async Task<PagedResult<PlayerDto>> GetPlayersAsync(int? leagueId, int? teamId, PaginationParams pagination) {
+        public async Task<PagedResult<PlayerDto>> GetPlayersAsync(
+    int? leagueId,
+    int? teamId,
+    PaginationParams pagination) {
             var query = _context.Players
                 .AsNoTracking()
                 .AsQueryable();
 
-            // Filtrar por liga usando la navegación Player → Team
+            // Filtrar por liga usando Player → Team
             if (leagueId.HasValue)
                 query = query.Where(p => p.Team.LeagueId == leagueId.Value);
 
-            if(teamId.HasValue)
+            // Filtrar por equipo
+            if (teamId.HasValue)
                 query = query.Where(p => p.TeamId == teamId.Value);
 
-            // Proyectar a DTO después de aplicar filtros
+            // Proyección a DTO
             var dtoQuery = query
                 .ProjectTo<PlayerDto>(_mapper.ConfigurationProvider);
 
+            // SIN PAGINADO
+            if (pagination.PageSize == 0) {
+                var items = await dtoQuery
+                    .OrderBy(x => x.Id)
+                    .ToListAsync();
+
+                return new PagedResult<PlayerDto> {
+                    Items = items,
+                    PageNumber = 1,
+                    PageSize = items.Count == 0 ? 1 : items.Count,
+                    TotalCount = items.Count
+                };
+            }
+
+            // CON PAGINADO
             return await dtoQuery.ToPagedResultAsync(
                 q => q.OrderBy(x => x.Id),
                 pagination.PageNumber,

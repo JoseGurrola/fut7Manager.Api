@@ -21,13 +21,31 @@ namespace fut7Manager.Api.Services {
         }
 
         public async Task<PagedResult<LeagueDto>> GetLeaguesAsync(PaginationParams pagination) {
+
             var query = _context.Leagues
                 .AsNoTracking()
                 .ProjectTo<LeagueDto>(_mapper.ConfigurationProvider);
 
-            return await query.ToPagedResultAsync(q => q.OrderBy(x => x.Id),
-               pagination.PageNumber,
-               pagination.PageSize);
+            // 🔹 Sin paginado
+            if (pagination == null || pagination.PageSize == 0) {
+
+                var items = await query
+                    .OrderBy(x => x.Id)
+                    .ToListAsync();
+
+                return new PagedResult<LeagueDto> {
+                    Items = items,
+                    PageNumber = 1,
+                    PageSize = items.Count == 0 ? 1 : items.Count,
+                    TotalCount = items.Count
+                };
+            }
+
+            // 🔹 Con paginado
+            return await query.ToPagedResultAsync(
+                q => q.OrderBy(x => x.Id),
+                pagination.PageNumber,
+                pagination.PageSize);
         }
 
         public async Task<LeagueDto?> GetLeagueByIdAsync(int id) {

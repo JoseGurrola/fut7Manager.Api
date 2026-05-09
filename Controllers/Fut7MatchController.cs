@@ -52,10 +52,10 @@ namespace fut7Manager.Api.Controllers {
         public async Task<IActionResult> UpdateMatch(int id, UpdateFut7MatchDto dto) {
             var result = await _matchService.UpdateMatchAsync(id, dto);
 
-            if (!result)
+            if (result == null)
                 return NotFound();
 
-            return NoContent();
+            return Ok(result);
         }
 
         [HttpDelete("{id}")]
