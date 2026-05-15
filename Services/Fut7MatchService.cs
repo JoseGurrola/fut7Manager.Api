@@ -44,6 +44,9 @@ namespace fut7Manager.Api.Services {
                 HomeTeamLogo = m.HomeTeam.LogoUrl,
                 AwayTeamLogo = m.AwayTeam.LogoUrl,
 
+                HomeTeamPrimaryColor = m.HomeTeam.TeamPrimaryColor,
+                AwayTeamPrimaryColor = m.AwayTeam.TeamPrimaryColor,
+
                 HomeGoals = m.HomeGoals,
                 AwayGoals = m.AwayGoals,
                 MatchDate = m.MatchDate,

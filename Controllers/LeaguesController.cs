@@ -70,12 +70,35 @@ namespace fut7Manager.Api.Controllers {
             return Ok();
         }
 
+        [HttpPost("{id}/schedule/preview")]
+        public async Task<IActionResult> PreviewSchedule(
+    int id,
+    GenerateScheduleDto dto) {
 
-        [HttpPost("{id}/schedule")]
-        public async Task<IActionResult> GenerateSchedule(int id, GenerateScheduleDto dto) {
             try {
-                var matchdays = await _scheduleService.GenerateScheduleAsync(id, dto.InterGroupMatches);
+
+                var matchdays =
+                    await _scheduleService.PreviewScheduleAsync(
+                        id,
+                        dto);
+
                 return Ok(matchdays);
+            }
+            catch (Exception ex) {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("{id}/finalize-setup")]
+        public async Task<IActionResult> FinalizeSetup(
+    int id,
+    FinalizeLeagueSetupDto dto) {
+
+            try {
+
+                await _scheduleService.FinalizeSetupAsync(id, dto);
+
+                return Ok();
             }
             catch (Exception ex) {
                 return BadRequest(ex.Message);

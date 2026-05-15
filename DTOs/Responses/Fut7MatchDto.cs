@@ -26,5 +26,8 @@
 
         public string? HomeTeamLogo { get; set; }
         public string? AwayTeamLogo { get; set; }
+
+        public string HomeTeamPrimaryColor { get; set; } = default!;
+        public string AwayTeamPrimaryColor { get; set; } = default!;
     }
 }

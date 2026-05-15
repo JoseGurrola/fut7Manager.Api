@@ -10,5 +10,7 @@ namespace fut7Manager.Api.DTOs.Responses {
         public LeagueStatus Status { get; set; }
 
         public string? LogoUrl { get; set; }
+
+        public DateTime CreationDate { get; set; }
     }
 }

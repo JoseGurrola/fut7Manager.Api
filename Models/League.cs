@@ -24,5 +24,7 @@ namespace fut7Manager.Api.Models {
         public LeagueStatus Status { get; set; } = LeagueStatus.Upcoming;
 
         public string? LogoUrl { get; set; }
+
+        public DateTime CreationDate { get; set; }
     }
 }

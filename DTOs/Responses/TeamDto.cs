@@ -20,7 +20,7 @@
 
         public int LeagueId { get; set; }
 
-        public int GroupId { get; set; }
+        public int? GroupId { get; set; }
 
         public decimal Paid { get; set; }
         public decimal Remaining { get; set; }

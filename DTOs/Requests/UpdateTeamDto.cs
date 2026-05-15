@@ -21,7 +21,7 @@ namespace fut7Manager.Api.DTOs.Requests {
 
         public int GoalsAgainst { get; set; }
 
-        public int GroupId { get; set; }
+        public int? GroupId { get; set; }
 
        public string TeamPrimaryColor { get; set; } = default!;
     }

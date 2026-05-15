@@ -76,7 +76,11 @@ namespace fut7Manager.Api.Mapping {
                 .ForMember(dest => dest.HomeTeamLogo,
                     opt => opt.MapFrom(src => src.HomeTeam.LogoUrl))
                 .ForMember(dest => dest.AwayTeamLogo,
-                    opt => opt.MapFrom(src => src.AwayTeam.LogoUrl));
+                    opt => opt.MapFrom(src => src.AwayTeam.LogoUrl))
+                .ForMember(dest => dest.HomeTeamPrimaryColor,
+                    opt => opt.MapFrom(src => src.HomeTeam.TeamPrimaryColor))
+                .ForMember(dest => dest.AwayTeamPrimaryColor,
+                    opt => opt.MapFrom(src => src.AwayTeam.TeamPrimaryColor));
 
 
 

@@ -90,7 +90,7 @@ namespace fut7Manager.Data {
                     .HasMaxLength(10);
                 entity.Property(t => t.TeamPrimaryColor)
                     .IsRequired()
-                    .HasMaxLength(8);
+                    .HasMaxLength(20);
             });
         }
     }

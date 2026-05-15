@@ -30,7 +30,7 @@ namespace fut7Manager.Api.Services {
             if (pagination == null || pagination.PageSize == 0) {
 
                 var items = await query
-                    .OrderBy(x => x.Id)
+                    .OrderByDescending(x => x.CreationDate)
                     .ToListAsync();
 
                 return new PagedResult<LeagueDto> {
@@ -43,7 +43,7 @@ namespace fut7Manager.Api.Services {
 
             // 🔹 Con paginado
             return await query.ToPagedResultAsync(
-                q => q.OrderBy(x => x.Id),
+                q => q.OrderByDescending(x => x.CreationDate),
                 pagination.PageNumber,
                 pagination.PageSize);
         }
@@ -58,6 +58,8 @@ namespace fut7Manager.Api.Services {
 
         public async Task<LeagueDto> CreateLeagueAsync(CreateLeagueDto dto) {
             var league = _mapper.Map<League>(dto);
+
+            league.CreationDate = DateTime.UtcNow;
 
             _context.Leagues.Add(league);
             await _context.SaveChangesAsync();

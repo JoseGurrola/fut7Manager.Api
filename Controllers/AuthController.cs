@@ -19,29 +19,37 @@ namespace fut7Manager.Controllers {
 
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequestDto request) {
-            if (request.Username != "admin" || request.Password != "1234")
+
+            if (request.Username != "admin" ||
+                request.Password != "1234")
                 return Unauthorized();
 
             var key = _config["Jwt:Key"];
 
             var tokenHandler = new JwtSecurityTokenHandler();
-            var keyBytes = Encoding.UTF8.GetBytes(key!);
 
-            var tokenDescriptor = new SecurityTokenDescriptor {
-                
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim(ClaimTypes.Name, request.Username)
-                }),
+            var keyBytes =
+                Encoding.UTF8.GetBytes(key!);
 
-                Expires = DateTime.UtcNow.AddHours(1),
+            var tokenDescriptor =
+                new SecurityTokenDescriptor {
 
-                SigningCredentials = new SigningCredentials(
-                    new SymmetricSecurityKey(keyBytes),
-                    SecurityAlgorithms.HmacSha256Signature)
-            };
+                    Subject = new ClaimsIdentity(new[]
+                    {
+                new Claim(ClaimTypes.Name, request.Username),
+                new Claim(ClaimTypes.Role, "Admin")
+                    }),
 
-            var token = tokenHandler.CreateToken(tokenDescriptor);
+                    Expires = DateTime.UtcNow.AddHours(8),
+
+                    SigningCredentials =
+                        new SigningCredentials(
+                            new SymmetricSecurityKey(keyBytes),
+                            SecurityAlgorithms.HmacSha256Signature)
+                };
+
+            var token =
+                tokenHandler.CreateToken(tokenDescriptor);
 
             return Ok(new LoginResponseDto {
                 Token = tokenHandler.WriteToken(token)

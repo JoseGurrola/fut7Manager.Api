@@ -12,8 +12,8 @@ using fut7Manager.Data;
 namespace fut7Manager.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260507225542_AddTeamPrimaryColortoTeams")]
-    partial class AddTeamPrimaryColortoTeams
+    [Migration("20260515160642_MakeGroupOptionalInTeam")]
+    partial class MakeGroupOptionalInTeam
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -241,7 +241,7 @@ namespace fut7Manager.Api.Migrations
                     b.Property<int>("GoalsFor")
                         .HasColumnType("int");
 
-                    b.Property<int>("GroupId")
+                    b.Property<int?>("GroupId")
                         .HasColumnType("int");
 
                     b.Property<int>("LeagueId")
@@ -273,7 +273,8 @@ namespace fut7Manager.Api.Migrations
 
                     b.Property<string>("TeamPrimaryColor")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
 
@@ -374,8 +375,7 @@ namespace fut7Manager.Api.Migrations
                     b.HasOne("fut7Manager.Api.Models.Group", "Group")
                         .WithMany("Teams")
                         .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("fut7Manager.Api.Models.League", "League")
                         .WithMany("Teams")

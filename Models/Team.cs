@@ -23,8 +23,8 @@ namespace fut7Manager.Api.Models {
         public League League { get; set; } = default!;
 
         // Group
-        public int GroupId { get; set; }
-        public Group Group { get; set; } = default!;
+        public int? GroupId { get; set; }
+        public Group? Group { get; set; } = default!;
 
         public ICollection<Player> Players { get; set; } = new List<Player>();
 
@@ -34,6 +34,7 @@ namespace fut7Manager.Api.Models {
 
         public string TeamManagerPhone { get; set; } = default!;
 
+        [MaxLength(20)]
         public string TeamPrimaryColor { get; set; } = default!;
 
     }
