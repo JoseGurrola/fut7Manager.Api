@@ -29,5 +29,9 @@
 
         public string HomeTeamPrimaryColor { get; set; } = default!;
         public string AwayTeamPrimaryColor { get; set; } = default!;
+
+        public int? HomePenaltyGoals { get; set; }
+
+        public int? AwayPenaltyGoals { get; set; }
     }
 }

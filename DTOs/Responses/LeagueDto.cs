@@ -1,4 +1,5 @@
 ﻿using fut7Manager.Api.Helpers;
+using System.ComponentModel.DataAnnotations;
 
 namespace fut7Manager.Api.DTOs.Responses {
     public class LeagueDto {
@@ -12,5 +13,9 @@ namespace fut7Manager.Api.DTOs.Responses {
         public string? LogoUrl { get; set; }
 
         public DateTime CreationDate { get; set; }
+
+        public bool UsePenaltyShootoutPoints { get; set; }
+
+        public int QualifiedTeamsPerGroup { get; set; }
     }
 }

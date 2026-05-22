@@ -52,6 +52,9 @@ namespace fut7Manager.Api.Services {
                 MatchDate = m.MatchDate,
                 Location = m.Location,
 
+                HomePenaltyGoals = m.HomePenaltyGoals,
+                AwayPenaltyGoals = m.AwayPenaltyGoals,
+
                 MatchdayId = m.MatchdayId,
                 MatchdayNumber = m.Matchday != null ? m.Matchday.Number : 0,
 

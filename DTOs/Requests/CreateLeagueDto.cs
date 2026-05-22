@@ -1,4 +1,5 @@
 ﻿using fut7Manager.Api.Helpers;
+using System.ComponentModel.DataAnnotations;
 
 namespace fut7Manager.Api.DTOs.Requests {
     public class CreateLeagueDto {
@@ -9,5 +10,10 @@ namespace fut7Manager.Api.DTOs.Requests {
         public LeagueStatus Status { get; set; } = LeagueStatus.Upcoming;
 
         public string? LogoUrl { get; set; }
+
+        public bool UsePenaltyShootoutPoints { get; set; }
+
+        [Range(1, int.MaxValue, ErrorMessage = "QualifiedTeamsPerGroup must be at least 1")]
+        public int QualifiedTeamsPerGroup { get; set; }
     }
 }

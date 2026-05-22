@@ -47,6 +47,19 @@ namespace fut7Manager.Controllers {
                 player);
         }
 
+        [HttpPost("import/{teamId}")]
+        public async Task<IActionResult> ImportPlayers(int teamId, ImportPlayersDto players) {
+            var success =
+                await _playerService.ImportPlayersAsync(
+                    teamId,
+                    players);
+
+            if (!success)
+                return BadRequest();
+
+            return NoContent();
+        }
+
         [HttpPut("{id}")]
         public async Task<ActionResult<PlayerDto>> UpdatePlayer(int id, UpdatePlayerDto dto) {
             var player = await _playerService.UpdatePlayerAsync(id, dto);

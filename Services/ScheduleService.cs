@@ -371,6 +371,8 @@ namespace fut7Manager.Api.Services {
             // =========================
             // 🔹 Jornada actual
             // =========================
+            var league = await _context.Leagues.FirstAsync(l => l.Id == leagueId);
+
 
             var currentMatchday = await _context.Matchdays
                 .Include(md => md.Matches)
@@ -526,18 +528,40 @@ namespace fut7Manager.Api.Services {
                             AddResult(home, "L");
                         }
 
-                    } else {
+                    } else { //empate
+                        if (league.UsePenaltyShootoutPoints) {
+                            if (home != null && away != null) {
+                                home.Draw++;
+                                away.Draw++;
 
-                        if (home != null) {
-                            home.Draw++;
-                            home.Points++;
-                            AddResult(home, "D");
-                        }
+                                var homePenaltyGoals = m.HomePenaltyGoals ?? 0;
+                                var awayPenaltyGoals = m.AwayPenaltyGoals ?? 0;
 
-                        if (away != null) {
-                            away.Draw++;
-                            away.Points++;
-                            AddResult(away, "D");
+
+                                if (homePenaltyGoals > awayPenaltyGoals) {
+                                    home.Points += 2;
+                                    away.Points++;
+                                } else if (homePenaltyGoals < awayPenaltyGoals) {
+                                    home.Points++;
+                                    away.Points += 2;
+                                } else {
+                                    home.Points++;
+                                    away.Points++;   
+                                }
+
+                                AddResult(home, "D");
+                                AddResult(away, "D");
+                            }
+                        } else {
+
+                            if (home != null && away != null) {
+                                home.Draw++;
+                                home.Points++;
+                                AddResult(home, "D");
+                                away.Draw++;
+                                away.Points++;
+                                AddResult(away, "D");
+                            }
                         }
                     }
                 }
@@ -599,6 +623,7 @@ namespace fut7Manager.Api.Services {
         }
 
         public async Task<StandingsResponseDto> GetStandingsAsync(int leagueId) {
+            var league = await _context.Leagues.FirstAsync(l => l.Id == leagueId);
 
             var teams = await _context.Teams
                 .Where(t => t.LeagueId == leagueId)
@@ -714,16 +739,39 @@ namespace fut7Manager.Api.Services {
                         }
                     } else {
 
-                        if (home != null) {
-                            home.Draw++;
-                            home.Points++;
-                            AddResult(home, "D");
-                        }
+                        if (league.UsePenaltyShootoutPoints) {
+                            if (home != null && away != null) {
+                                home.Draw++;
+                                away.Draw++;
 
-                        if (away != null) {
-                            away.Draw++;
-                            away.Points++;
-                            AddResult(away, "D");
+                                var homePenaltyGoals = m.HomePenaltyGoals ?? 0;
+                                var awayPenaltyGoals = m.AwayPenaltyGoals ?? 0;
+
+
+                                if (homePenaltyGoals > awayPenaltyGoals) {
+                                    home.Points += 2;
+                                    away.Points++;
+                                } else if (homePenaltyGoals < awayPenaltyGoals) {
+                                    home.Points++;
+                                    away.Points += 2;
+                                } else {
+                                    home.Points++;
+                                    away.Points++;
+                                }
+
+                                AddResult(home, "D");
+                                AddResult(away, "D");
+                            }
+                        } else {
+
+                            if (home != null && away != null) {
+                                home.Draw++;
+                                home.Points++;
+                                AddResult(home, "D");
+                                away.Draw++;
+                                away.Points++;
+                                AddResult(away, "D");
+                            }
                         }
                     }
                 }
@@ -784,9 +832,7 @@ namespace fut7Manager.Api.Services {
             };
         }
 
-        private static void AddResult(
-    StandingDto standing,
-    string result) {
+        private static void AddResult(StandingDto standing, string result) {
 
             standing.Last5Results.Insert(0, result);
 

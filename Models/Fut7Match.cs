@@ -18,6 +18,10 @@
 
         public int LeagueId { get; set; }
 
+        public int? HomePenaltyGoals { get; set; }
+
+        public int? AwayPenaltyGoals { get; set; }
+
         // Navigation properties
         public Team HomeTeam { get; set; } = default!;
 

@@ -16,6 +16,7 @@ namespace fut7Manager.Api.Mapping {
                     opt => opt.MapFrom(src => src.Team.TeamPrimaryColor));
             CreateMap<CreatePlayerDto, Player>();
             CreateMap<UpdatePlayerDto, Player>();
+            CreateMap<PlayerDto, Player>();
 
             // Team
             CreateMap<Team, TeamDto>()

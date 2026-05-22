@@ -8,6 +8,7 @@ using fut7Manager.Api.Models;
 using fut7Manager.Api.Services.Interfaces;
 using fut7Manager.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Numerics;
 
 namespace fut7Manager.Api.Services {
     public class PlayerService : IPlayerService {
@@ -79,6 +80,49 @@ namespace fut7Manager.Api.Services {
                 .LoadAsync();
 
             return _mapper.Map<PlayerDto>(player);
+        }
+
+        public async Task<bool> ImportPlayersAsync(int teamId, ImportPlayersDto dto) {
+
+            var teamExists = await _context.Teams
+                .AnyAsync(t => t.Id == teamId);
+
+            if (!teamExists)
+                return false;
+
+            using var transaction =
+                await _context.Database.BeginTransactionAsync();
+
+            try {
+                if (dto?.Players == null || !dto.Players.Any())
+                    return false;
+                // borrar jugadores actuales
+                var existingPlayers =
+                    await _context.Players
+                        .Where(p => p.TeamId == teamId)
+                        .ToListAsync();
+
+                _context.Players.RemoveRange(existingPlayers);
+                await _context.SaveChangesAsync();
+                // mapear nuevos jugadores
+
+                var newPlayers = _mapper.Map<List<Player>>(dto.Players);
+
+                foreach (var player in newPlayers)
+                    player.TeamId = teamId;
+
+                await _context.Players.AddRangeAsync(newPlayers);
+
+                await _context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
+                return true;
+            }
+            catch {
+                await transaction.RollbackAsync();
+                return false;
+            }
         }
 
         public async Task<PlayerDto?> UpdatePlayerAsync(int id, UpdatePlayerDto dto) {

@@ -7,5 +7,9 @@
         public DateTime MatchDate { get; set; }
 
         public string? Location { get; set; }
+
+        public int? HomePenaltyGoals { get; set; }
+
+        public int? AwayPenaltyGoals { get; set; }
     }
 }

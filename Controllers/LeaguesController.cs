@@ -2,8 +2,6 @@
 using fut7Manager.Api.DTOs.Requests;
 using fut7Manager.Api.DTOs.Responses;
 using fut7Manager.Api.Extensions;
-using fut7Manager.Api.Models;
-using fut7Manager.Api.Services;
 using fut7Manager.Api.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -62,12 +60,15 @@ namespace fut7Manager.Api.Controllers {
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateLeague(int id, CreateLeagueDto dto) {
-            var result = await _leagueService.UpdateLeagueAsync(id, dto);
+          
+            var success =await _leagueService.UpdateLeagueAsync(id, dto);
 
-            if (!result)
-                return NotFound();
+            if (!success)
+                return BadRequest(new {
+                    code = 1
+                });
 
-            return Ok();
+            return NoContent();
         }
 
         [HttpPost("{id}/schedule/preview")]
