@@ -28,8 +28,8 @@ namespace fut7Manager.Api.Models {
         public DateTime CreationDate { get; set; }
 
         public bool UsePenaltyShootoutPoints { get; set; }
+        public int? QualifiedTeamsPerGroup { get; set; }
 
-        [Range(1, int.MaxValue, ErrorMessage = "QualifiedTeamsPerGroup must be at least 1")]
-        public int QualifiedTeamsPerGroup { get; set; }
+        public int? MinPlayers { get; set; }
     }
 }

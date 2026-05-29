@@ -22,10 +22,13 @@ namespace fut7Manager.Api.Mapping {
             CreateMap<Team, TeamDto>()
                 .ForMember(d => d.Paid,
                     opt => opt.MapFrom(s => s.Payments.Sum(p => (decimal?)p.Amount) ?? 0))
+                .ForMember(d => d.numPlayers,
+                    opt => opt.MapFrom(s => s.Players.Count(p => p.Active)))
                 .ForMember(d => d.Remaining,
                     opt => opt.MapFrom(s =>
                         (s.League != null ? s.League.RegistrationFee : 0) -
                         (s.Payments.Sum(p => (decimal?)p.Amount) ?? 0)));
+            
 
             CreateMap<CreateTeamDto, Team>()
                 .ForMember(d => d.League, o => o.Ignore())

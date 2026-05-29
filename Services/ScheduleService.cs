@@ -11,15 +11,17 @@ namespace fut7Manager.Api.Services {
 
         private readonly IMapper _mapper;
         private readonly ApplicationDbContext _context;
-
+        private readonly IStandingsService _standingsService;
         private static readonly Random _random = new Random();
 
         public ScheduleService(
             ApplicationDbContext context,
-            IMapper mapper) {
+            IMapper mapper,
+            IStandingsService standingsService) {
 
             _context = context;
             _mapper = mapper;
+            _standingsService = standingsService;
         }
 
         public async Task<List<MatchdayDto>> PreviewScheduleAsync(
@@ -368,11 +370,20 @@ namespace fut7Manager.Api.Services {
         }
 
         public async Task<LeagueDashboardDto> GetDashboardAsync(int leagueId) {
-            // =========================
-            // 🔹 Jornada actual
-            // =========================
-            var league = await _context.Leagues.FirstAsync(l => l.Id == leagueId);
+            var league = await _context.Leagues
+                .FirstAsync(l => l.Id == leagueId);
 
+            var teams = await _context.Teams
+                .Where(t => t.LeagueId == leagueId)
+                .ToListAsync();
+
+            var matches = await _context.Matches
+                .Where(m => m.LeagueId == leagueId)
+                .ToListAsync();
+
+            var groups = await _context.Groups
+                .Where(g => g.LeagueId == leagueId)
+                .ToListAsync();
 
             var currentMatchday = await _context.Matchdays
                 .Include(md => md.Matches)
@@ -389,9 +400,7 @@ namespace fut7Manager.Api.Services {
             MatchdayDto? matchdayDto = null;
 
             if (currentMatchday != null) {
-                var allTeams = await _context.Teams
-                    .Where(t => t.LeagueId == leagueId)
-                    .ToListAsync();
+                var allTeams = teams;
 
                 currentMatchday.RestingTeamNames = allTeams
                     .Where(t => !currentMatchday.Matches.Any(m =>
@@ -403,227 +412,24 @@ namespace fut7Manager.Api.Services {
                 matchdayDto = _mapper.Map<MatchdayDto>(currentMatchday);
             }
 
-            // =========================
-            // 🔹 Equipos
-            // =========================
+            var dashboard = _standingsService.BuildDashboard(
+                league,
+                teams,
+                matches.Where(m => m.HomeGoals != null && m.AwayGoals != null).ToList(),
+                groups);
 
-            var teams = await _context.Teams
-                .Where(t => t.LeagueId == leagueId)
-                .ToListAsync();
+            dashboard.CurrentMatchday = matchdayDto;
 
-
-            // =========================
-            // 🔹 Partidos jugados
-            // =========================
-
-            var matches = await _context.Matches
-                .Where(m =>
-                    m.LeagueId == leagueId &&
-                    m.HomeGoals != null &&
-                    m.AwayGoals != null)
-                .OrderByDescending(m => m.MatchDate.HasValue)
-                .ThenByDescending(m => m.MatchDate)
-                .ThenByDescending(m => m.Id)
-                .ToListAsync();
-
-            // =========================
-            // 🔹 Grupos
-            // =========================
-
-            var groups = await _context.Groups
-     .Where(g => g.LeagueId == leagueId)
-     .ToListAsync();
-
-            var groupedStandings = new List<GroupStandingDto>();
-
-            var teamsByGroup = teams.GroupBy(t => t.GroupId);
-
-            foreach (var group in teamsByGroup) {
-
-                var groupId = group.Key;
-
-                var standingsDict = group.ToDictionary(
-                    t => t.Id,
-                    t => new StandingDto {
-
-                        TeamId = t.Id,
-                        TeamName = t.Name,
-                        Played = 0,
-                        Won = 0,
-                        Draw = 0,
-                        Lost = 0,
-                        GoalsFor = 0,
-                        GoalsAgainst = 0,
-                        Points = 0,
-                        Last5Results = new List<string>(),
-                        LogoUrl = t.LogoUrl
-                    });
-
-                foreach (var m in matches) {
-
-                    var homeExists =
-                        standingsDict.ContainsKey(m.HomeTeamId);
-
-                    var awayExists =
-                        standingsDict.ContainsKey(m.AwayTeamId);
-
-                    // este grupo no participa
-                    if (!homeExists && !awayExists)
-                        continue;
-
-                    StandingDto? home = null;
-                    StandingDto? away = null;
-
-                    if (homeExists)
-                        home = standingsDict[m.HomeTeamId];
-
-                    if (awayExists)
-                        away = standingsDict[m.AwayTeamId];
-
-                    // =========================
-                    // PARTIDOS JUGADOS
-                    // =========================
-
-                    if (home != null) {
-
-                        home.Played++;
-                        home.GoalsFor += m.HomeGoals!.Value;
-                        home.GoalsAgainst += m.AwayGoals!.Value;
-                    }
-
-                    if (away != null) {
-
-                        away.Played++;
-                        away.GoalsFor += m.AwayGoals!.Value;
-                        away.GoalsAgainst += m.HomeGoals!.Value;
-                    }
-
-                    // =========================
-                    // RESULTADO
-                    // =========================
-
-                    if (m.HomeGoals > m.AwayGoals) {
-
-                        if (home != null) {
-                            home.Won++;
-                            home.Points += 3;
-                            AddResult(home, "W");
-                        }
-
-                        if (away != null) {
-                            away.Lost++;
-                            AddResult(away, "L");
-                        }
-
-                    } else if (m.HomeGoals < m.AwayGoals) {
-
-                        if (away != null) {
-                            away.Won++;
-                            away.Points += 3;
-                            AddResult(away, "W");
-                        }
-
-                        if (home != null) {
-                            home.Lost++;
-                            AddResult(home, "L");
-                        }
-
-                    } else { //empate
-                        if (league.UsePenaltyShootoutPoints) {
-                            if (home != null && away != null) {
-                                home.Draw++;
-                                away.Draw++;
-
-                                var homePenaltyGoals = m.HomePenaltyGoals ?? 0;
-                                var awayPenaltyGoals = m.AwayPenaltyGoals ?? 0;
-
-
-                                if (homePenaltyGoals > awayPenaltyGoals) {
-                                    home.Points += 2;
-                                    away.Points++;
-                                } else if (homePenaltyGoals < awayPenaltyGoals) {
-                                    home.Points++;
-                                    away.Points += 2;
-                                } else {
-                                    home.Points++;
-                                    away.Points++;   
-                                }
-
-                                AddResult(home, "D");
-                                AddResult(away, "D");
-                            }
-                        } else {
-
-                            if (home != null && away != null) {
-                                home.Draw++;
-                                home.Points++;
-                                AddResult(home, "D");
-                                away.Draw++;
-                                away.Points++;
-                                AddResult(away, "D");
-                            }
-                        }
-                    }
-                }
-
-                var standings = standingsDict.Values
-                    .OrderByDescending(t => t.Points)
-                    .ThenByDescending(t => t.GoalDifference)
-                    .ThenByDescending(t => t.GoalsFor)
-                    .ThenBy(t => t.TeamName)
-                    .ToList();
-
-                for (int i = 0; i < standings.Count; i++)
-                    standings[i].Position = i + 1;
-
-                groupedStandings.Add(new GroupStandingDto {
-
-                    GroupName =
-                        groups.FirstOrDefault(g => g.Id == groupId)?.Name
-                        ?? $"Grupo {groupId}",
-
-                    Standings = standings
-                });
-            }
-
-            // =========================
-            // 🔹 Tabla general
-            // =========================
-
-            var flatStandings = groupedStandings
-                 .SelectMany(g => g.Standings)
-                 .Select(s => new StandingDto {
-
-                     TeamId = s.TeamId,
-                     TeamName = s.TeamName,
-                     Played = s.Played,
-                     Won = s.Won,
-                     Draw = s.Draw,
-                     Lost = s.Lost,
-                     GoalsFor = s.GoalsFor,
-                     GoalsAgainst = s.GoalsAgainst,
-                     Points = s.Points,
-                     Last5Results = s.Last5Results.ToList(),
-                     LogoUrl = s.LogoUrl
-                 })
-                 .OrderByDescending(t => t.Points)
-                 .ThenByDescending(t => t.GoalDifference)
-                 .ThenByDescending(t => t.GoalsFor)
-                 .ThenBy(t => t.TeamName)
-                 .ToList();
-
-            for (int i = 0; i < flatStandings.Count; i++)
-                flatStandings[i].Position = i + 1;
-
-            return new LeagueDashboardDto {
-                CurrentMatchday = matchdayDto,
-                GroupedStandings = groupedStandings,
-                Standings = flatStandings
-            };
+            return dashboard;
         }
-
+        private static void AddResult(StandingDto standing, string result) {
+            standing.Last5Results.Insert(0, result);
+            if (standing.Last5Results.Count > 5)
+                standing.Last5Results.RemoveAt(5);
+        }
         public async Task<StandingsResponseDto> GetStandingsAsync(int leagueId) {
-            var league = await _context.Leagues.FirstAsync(l => l.Id == leagueId);
+            var league = await _context.Leagues
+                .FirstAsync(l => l.Id == leagueId);
 
             var teams = await _context.Teams
                 .Where(t => t.LeagueId == leagueId)
@@ -634,210 +440,22 @@ namespace fut7Manager.Api.Services {
                     m.LeagueId == leagueId &&
                     m.HomeGoals != null &&
                     m.AwayGoals != null)
-                .OrderByDescending(m => m.MatchDate.HasValue)
-                .ThenByDescending(m => m.MatchDate)
-                .ThenByDescending(m => m.Id)
                 .ToListAsync();
 
             var groups = await _context.Groups
                 .Where(g => g.LeagueId == leagueId)
                 .ToListAsync();
 
-            var groupedStandings = new List<GroupStandingDto>();
-
-            var teamsByGroup = teams.GroupBy(t => t.GroupId);
-
-            foreach (var group in teamsByGroup) {
-
-                var groupId = group.Key;
-
-                var standingsDict = group.ToDictionary(
-                    t => t.Id,
-                    t => new StandingDto {
-
-                        TeamId = t.Id,
-                        TeamName = t.Name,
-                        Played = 0,
-                        Won = 0,
-                        Draw = 0,
-                        Lost = 0,
-                        GoalsFor = 0,
-                        GoalsAgainst = 0,
-                        Points = 0,
-                        Last5Results = new List<string>(),
-                        LogoUrl = t.LogoUrl
-                    });
-
-           
-
-                foreach (var m in matches) {
-
-                    var homeExists =
-                        standingsDict.ContainsKey(m.HomeTeamId);
-
-                    var awayExists =
-                        standingsDict.ContainsKey(m.AwayTeamId);
-
-                    // este grupo no participa
-                    if (!homeExists && !awayExists)
-                        continue;
-
-                    StandingDto? home = null;
-                    StandingDto? away = null;
-
-                    if (homeExists)
-                        home = standingsDict[m.HomeTeamId];
-
-                    if (awayExists)
-                        away = standingsDict[m.AwayTeamId];
-
-                    // =========================
-                    // PARTIDOS JUGADOS
-                    // =========================
-
-                    if (home != null) {
-
-                        home.Played++;
-                        home.GoalsFor += m.HomeGoals!.Value;
-                        home.GoalsAgainst += m.AwayGoals!.Value;
-                    }
-
-                    if (away != null) {
-
-                        away.Played++;
-                        away.GoalsFor += m.AwayGoals!.Value;
-                        away.GoalsAgainst += m.HomeGoals!.Value;
-                    }
-
-                    // =========================
-                    // RESULTADO
-                    // =========================
-
-                    if (m.HomeGoals > m.AwayGoals) {
-
-                        if (home != null) {
-                            home.Won++;
-                            home.Points += 3;
-                            AddResult(home, "W");
-                        }
-
-                        if (away != null) {
-                            away.Lost++;
-                            AddResult(away, "L");
-                        }
-                    } else if (m.HomeGoals < m.AwayGoals) {
-
-                        if (away != null) {
-                            away.Won++;
-                            away.Points += 3;
-                            AddResult(away, "W");
-                        }
-
-                        if (home != null) {
-                            home.Lost++;
-                            AddResult(home, "L");
-                        }
-                    } else {
-
-                        if (league.UsePenaltyShootoutPoints) {
-                            if (home != null && away != null) {
-                                home.Draw++;
-                                away.Draw++;
-
-                                var homePenaltyGoals = m.HomePenaltyGoals ?? 0;
-                                var awayPenaltyGoals = m.AwayPenaltyGoals ?? 0;
-
-
-                                if (homePenaltyGoals > awayPenaltyGoals) {
-                                    home.Points += 2;
-                                    away.Points++;
-                                } else if (homePenaltyGoals < awayPenaltyGoals) {
-                                    home.Points++;
-                                    away.Points += 2;
-                                } else {
-                                    home.Points++;
-                                    away.Points++;
-                                }
-
-                                AddResult(home, "D");
-                                AddResult(away, "D");
-                            }
-                        } else {
-
-                            if (home != null && away != null) {
-                                home.Draw++;
-                                home.Points++;
-                                AddResult(home, "D");
-                                away.Draw++;
-                                away.Points++;
-                                AddResult(away, "D");
-                            }
-                        }
-                    }
-                }
-
-                var standings = standingsDict.Values
-                    .OrderByDescending(t => t.Points)
-                    .ThenByDescending(t => t.GoalDifference)
-                    .ThenByDescending(t => t.GoalsFor)
-                    .ThenBy(t => t.TeamName)
-                    .ToList();
-
-                for (int i = 0; i < standings.Count; i++)
-                    standings[i].Position = i + 1;
-
-                groupedStandings.Add(new GroupStandingDto {
-
-                    GroupName =
-                        groups.FirstOrDefault(g => g.Id == groupId)?.Name
-                        ?? $"Grupo {groupId}",
-
-                    Standings = standings
-                });
-            }
-
-            // =========================
-            // 🔹 Tabla general
-            // =========================
-
-            var generalStandings = groupedStandings
-                .SelectMany(g => g.Standings)
-                .Select(s => new StandingDto {
-
-                    TeamId = s.TeamId,
-                    TeamName = s.TeamName,
-                    Played = s.Played,
-                    Won = s.Won,
-                    Draw = s.Draw,
-                    Lost = s.Lost,
-                    GoalsFor = s.GoalsFor,
-                    GoalsAgainst = s.GoalsAgainst,
-                    Points = s.Points,
-                    Last5Results = s.Last5Results.ToList(),
-                    LogoUrl = s.LogoUrl
-                })
-                .OrderByDescending(t => t.Points)
-                .ThenByDescending(t => t.GoalDifference)
-                .ThenByDescending(t => t.GoalsFor)
-                .ThenBy(t => t.TeamName)
-                .ToList();
-
-            for (int i = 0; i < generalStandings.Count; i++)
-                generalStandings[i].Position = i + 1;
+            var dashboard = _standingsService.BuildDashboard(
+                league,
+                teams,
+                matches,
+                groups);
 
             return new StandingsResponseDto {
-
-                GroupedStandings = groupedStandings,
-                Standings = generalStandings
+                GroupedStandings = dashboard.GroupedStandings,
+                Standings = dashboard.Standings
             };
-        }
-
-        private static void AddResult(StandingDto standing, string result) {
-
-            standing.Last5Results.Insert(0, result);
-
-            if (standing.Last5Results.Count > 5)
-                standing.Last5Results.RemoveAt(5);
         }
     }
 }

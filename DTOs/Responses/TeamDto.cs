@@ -26,5 +26,7 @@
         public decimal Remaining { get; set; }
 
         public string TeamPrimaryColor { get; set; } = default!;
+
+        public int? numPlayers { get; set; }
     }
 }

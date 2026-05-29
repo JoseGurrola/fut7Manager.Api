@@ -129,5 +129,76 @@ namespace fut7Manager.Api.Services {
 
             return true;
         }
+
+        public async Task<List<MatchdayDto>> GetMatchdaysAsync(int leagueId) {
+            var matchdays = await _context.Matchdays
+                .AsNoTracking()
+                .Include(md => md.Matches)
+                    .ThenInclude(m => m.HomeTeam)
+                .Include(md => md.Matches)
+                    .ThenInclude(m => m.AwayTeam)
+                .Where(md => md.LeagueId == leagueId)
+                .OrderBy(md => md.Number)
+                .ToListAsync();
+
+            var allTeams = await _context.Teams
+                .Where(t => t.LeagueId == leagueId)
+                .ToListAsync();
+
+            var result = matchdays.Select(md =>
+            {
+                // calcular descansos dinámicamente
+                var restingTeams = allTeams
+                    .Where(t => !md.Matches.Any(m =>
+                        m.HomeTeamId == t.Id ||
+                        m.AwayTeamId == t.Id))
+                    .Select(t => t.Name)
+                    .ToList();
+
+                return new MatchdayDto {
+                    Id = md.Id,
+                    Number = md.Number,
+                    RestingTeamNames = restingTeams,
+
+                    Matches = md.Matches
+                        .OrderBy(m => m.MatchDate == null)
+                        .ThenBy(m => m.MatchDate)
+                        .ThenBy(m => m.Id)
+                        .Select(m => new Fut7MatchDto {
+                            Id = m.Id,
+
+                            HomeTeamId = m.HomeTeamId,
+                            AwayTeamId = m.AwayTeamId,
+
+                            HomeTeamName = m.HomeTeam.Name,
+                            AwayTeamName = m.AwayTeam.Name,
+
+                            HomeTeamLogo = m.HomeTeam.LogoUrl,
+                            AwayTeamLogo = m.AwayTeam.LogoUrl,
+
+                            HomeTeamPrimaryColor = m.HomeTeam.TeamPrimaryColor,
+                            AwayTeamPrimaryColor = m.AwayTeam.TeamPrimaryColor,
+
+                            HomeGoals = m.HomeGoals,
+                            AwayGoals = m.AwayGoals,
+
+                            HomePenaltyGoals = m.HomePenaltyGoals,
+                            AwayPenaltyGoals = m.AwayPenaltyGoals,
+
+                            MatchDate = m.MatchDate,
+                            Location = m.Location,
+
+                            MatchdayId = m.MatchdayId,
+                            MatchdayNumber = md.Number,
+
+                            GroupId = m.GroupId,
+                            LeagueId = m.LeagueId
+                        })
+                        .ToList()
+                };
+            }).ToList();
+
+            return result;
+        }
     }
 }

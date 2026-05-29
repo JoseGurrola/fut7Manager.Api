@@ -67,5 +67,12 @@ namespace fut7Manager.Api.Controllers {
 
             return NoContent();
         }
+
+        [HttpGet("matchdays")]
+        public async Task<ActionResult<List<MatchdayDto>>> GetMatchdays([FromQuery] int leagueId) {
+            var result = await _matchService.GetMatchdaysAsync(leagueId);
+
+            return Ok(result);
+        }
     }
 }

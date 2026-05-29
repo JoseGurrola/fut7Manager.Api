@@ -13,7 +13,8 @@ namespace fut7Manager.Api.DTOs.Requests {
 
         public bool UsePenaltyShootoutPoints { get; set; }
 
-        [Range(1, int.MaxValue, ErrorMessage = "QualifiedTeamsPerGroup must be at least 1")]
-        public int QualifiedTeamsPerGroup { get; set; }
+        public int? QualifiedTeamsPerGroup { get; set; }
+
+        public int? MinPlayers { get; set; }
     }
 }

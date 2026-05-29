@@ -13,5 +13,8 @@ namespace fut7Manager.Api.Services.Interfaces {
 
         Task<Fut7MatchDto?> UpdateMatchAsync(int id, UpdateFut7MatchDto dto);
         Task<bool> DeleteMatchAsync(int id);
+
+        Task<List<MatchdayDto>> GetMatchdaysAsync(int leagueId);
     }
+        
 }

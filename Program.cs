@@ -1,3 +1,4 @@
+using fut7Manager.Api.Helpers;
 using fut7Manager.Api.Mapping;
 using fut7Manager.Api.MiddleWare;
 using fut7Manager.Api.Models;
@@ -9,8 +10,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Text;
 using Serilog;
+using System.Text;
 
 //using fut7Manager.Services;
 
@@ -70,6 +71,10 @@ builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<IScheduleService, ScheduleService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IFileStorageService,FileStorageService>();
+builder.Services.AddScoped<IStandingsService, StandingsService>();
+builder.Services.AddScoped<StandingsEngine>();
+builder.Services.AddScoped<MatchResultApplier>();
+builder.Services.AddScoped<StandingsQuery>();
 
 builder.Services.AddSwaggerGen(options => { // Configuración de Swagger (documentación de la API)
     options.SwaggerDoc("v1", new() { Title = "fut7Manager", Version = "v1" }); // Define un documento Swagger versión 1
