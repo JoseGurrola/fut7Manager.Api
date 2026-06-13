@@ -31,5 +31,7 @@
         public Group Group { get; set; } = default!;
 
         public League League { get; set; } = default!;
+
+        public ICollection<MatchPlayerStat> PlayerStats { get; set; } = new List<MatchPlayerStat>();
     }
 }

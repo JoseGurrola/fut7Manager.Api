@@ -13,7 +13,7 @@ namespace fut7Manager.Api.DTOs.Requests {
 
         public bool UsePenaltyShootoutPoints { get; set; }
 
-        public int? QualifiedTeamsPerGroup { get; set; }
+        public int? TotalQualifiedTeams { get; set; }
 
         public int? MinPlayers { get; set; }
     }

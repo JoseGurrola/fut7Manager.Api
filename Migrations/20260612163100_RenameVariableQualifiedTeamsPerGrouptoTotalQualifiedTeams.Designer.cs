@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using fut7Manager.Data;
 
@@ -11,9 +12,11 @@ using fut7Manager.Data;
 namespace fut7Manager.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260612163100_RenameVariableQualifiedTeamsPerGrouptoTotalQualifiedTeams")]
+    partial class RenameVariableQualifiedTeamsPerGrouptoTotalQualifiedTeams
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -145,46 +148,6 @@ namespace fut7Manager.Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Leagues");
-                });
-
-            modelBuilder.Entity("fut7Manager.Api.Models.MatchPlayerStat", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Goals")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsHomeTeam")
-                        .HasColumnType("bit");
-
-                    b.Property<int?>("JerseyNumber")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MatchId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("PlayerId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("PlayerName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("RedCards")
-                        .HasColumnType("int");
-
-                    b.Property<int>("YellowCards")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MatchId");
-
-                    b.ToTable("MatchPlayerStats");
                 });
 
             modelBuilder.Entity("fut7Manager.Api.Models.Matchday", b =>
@@ -392,17 +355,6 @@ namespace fut7Manager.Api.Migrations
                     b.Navigation("League");
                 });
 
-            modelBuilder.Entity("fut7Manager.Api.Models.MatchPlayerStat", b =>
-                {
-                    b.HasOne("fut7Manager.Api.Models.Fut7Match", "Match")
-                        .WithMany("PlayerStats")
-                        .HasForeignKey("MatchId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Match");
-                });
-
             modelBuilder.Entity("fut7Manager.Api.Models.Matchday", b =>
                 {
                     b.HasOne("fut7Manager.Api.Models.League", "League")
@@ -452,11 +404,6 @@ namespace fut7Manager.Api.Migrations
                     b.Navigation("Group");
 
                     b.Navigation("League");
-                });
-
-            modelBuilder.Entity("fut7Manager.Api.Models.Fut7Match", b =>
-                {
-                    b.Navigation("PlayerStats");
                 });
 
             modelBuilder.Entity("fut7Manager.Api.Models.Group", b =>

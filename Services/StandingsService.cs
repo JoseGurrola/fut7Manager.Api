@@ -42,13 +42,13 @@ namespace fut7Manager.Api.Services {
                     .ToHashSet();
 
                 var standings = Map(
-     generalStandings
-         .Where(s => teamIds.Contains(s.TeamId))
-         .OrderByDescending(x => x.Points)
-         .ThenByDescending(x => x.GoalDifference)
-         .ThenByDescending(x => x.GoalsFor)
-         .ThenBy(x => x.TeamName)
-         .ToList());
+                    generalStandings
+                        .Where(s => teamIds.Contains(s.TeamId))
+                        .OrderByDescending(x => x.Points)
+                        .ThenByDescending(x => x.GoalDifference)
+                        .ThenByDescending(x => x.GoalsFor)
+                        .ThenBy(x => x.TeamName)
+                        .ToList());
 
                 for (int i = 0; i < standings.Count; i++) {
                     standings[i].Position = i + 1;
@@ -56,13 +56,56 @@ namespace fut7Manager.Api.Services {
 
                 result.Add(new GroupStandingDto {
                     GroupName = groups.FirstOrDefault(g => g.Id == groupId)?.Name
-        ?? $"Grupo {groupId}",
+                                ?? $"Grupo {groupId}",
                     Standings = standings
                 });
             }
 
+            // 🔹 Lógica de clasificación dinámica
+            int totalQualified = league.TotalQualifiedTeams ?? 0;
+            int groupCount = result.Count;
+
+            if (groupCount > 0 && totalQualified > 0) {
+                int baseQualifiedPerGroup = totalQualified / groupCount;
+                int remainingSlots = totalQualified % groupCount;
+
+                // Clasificados base por grupo
+                foreach (var g in result) {
+                    for (int i = 0; i < g.Standings.Count; i++) {
+                        if (i < baseQualifiedPerGroup) {
+                            g.Standings[i].IsQualified = true;
+                        }
+                    }
+                }
+
+                // 🔹 Candidatos extra (máximo 1 por grupo)
+                var extraCandidates = new List<StandingDto>();
+                foreach (var g in result) {
+                    var candidate = g.Standings
+                        .Where(s => !s.IsQualified)
+                        .OrderByDescending(s => s.Points)
+                        .ThenByDescending(s => s.GoalDifference)
+                        .ThenByDescending(s => s.GoalsFor)
+                        .FirstOrDefault();
+
+                    if (candidate != null) {
+                        extraCandidates.Add(candidate);
+                    }
+                }
+
+                // Selección de los mejores extras hasta llenar remainingSlots
+                foreach (var team in extraCandidates
+                    .OrderByDescending(s => s.Points)
+                    .ThenByDescending(s => s.GoalDifference)
+                    .ThenByDescending(s => s.GoalsFor)
+                    .Take(remainingSlots)) {
+                    team.IsQualified = true;
+                }
+            }
+
             return result;
         }
+
 
         public LeagueDashboardDto BuildDashboard(
     League league,
@@ -80,16 +123,28 @@ namespace fut7Manager.Api.Services {
                 general[i].Position = i + 1;
             }
 
-            return new LeagueDashboardDto {
-                GroupedStandings = BuildGroupedStandings(
-         league,
-         teams,
-         matches,
-         groups),
+            // 🔹 Construir standings por grupo con lógica de clasificados
+            var grouped = BuildGroupedStandings(league, teams, matches, groups);
 
+            // 🔹 Sincronizar clasificados en la tabla general
+            var qualifiedIds = grouped
+                .SelectMany(g => g.Standings)
+                .Where(s => s.IsQualified)
+                .Select(s => s.TeamId)
+                .ToHashSet();
+
+            foreach (var team in general) {
+                if (qualifiedIds.Contains(team.TeamId)) {
+                    team.IsQualified = true;
+                }
+            }
+
+            return new LeagueDashboardDto {
+                GroupedStandings = grouped,
                 Standings = general
             };
         }
+
 
         private static StandingDto Map(StandingAccumulator s) {
             return new StandingDto {

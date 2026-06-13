@@ -43,7 +43,7 @@ namespace fut7Manager.Api.Services {
             // SIN PAGINADO
             if (pagination.PageSize == 0) {
                 var items = await dtoQuery
-                    .OrderBy(x => x.Id)
+                    .OrderBy(x => x.JerseyNumber)
                     .ToListAsync();
 
                 return new PagedResult<PlayerDto> {

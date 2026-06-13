@@ -86,10 +86,38 @@ namespace fut7Manager.Api.Mapping {
                 .ForMember(dest => dest.AwayTeamPrimaryColor,
                     opt => opt.MapFrom(src => src.AwayTeam.TeamPrimaryColor));
 
-
-
             CreateMap<CreateFut7MatchDto, Fut7Match>();
             CreateMap<UpdateFut7MatchDto, Fut7Match>();
+
+            CreateMap<Fut7Match, Fut7MatchDetailsDto>()
+    .ForMember(dest => dest.HomeTeamId,
+        opt => opt.MapFrom(src => src.HomeTeamId))
+    .ForMember(dest => dest.AwayTeamId,
+        opt => opt.MapFrom(src => src.AwayTeamId))
+    .ForMember(dest => dest.HomeTeamName,
+        opt => opt.MapFrom(src => src.HomeTeam.Name))
+    .ForMember(dest => dest.AwayTeamName,
+        opt => opt.MapFrom(src => src.AwayTeam.Name))
+    .ForMember(dest => dest.MatchdayNumber,
+        opt => opt.MapFrom(src => src.Matchday != null ? src.Matchday.Number : 0))
+    .ForMember(dest => dest.HomeTeamLogo,
+        opt => opt.MapFrom(src => src.HomeTeam.LogoUrl))
+    .ForMember(dest => dest.AwayTeamLogo,
+        opt => opt.MapFrom(src => src.AwayTeam.LogoUrl))
+    .ForMember(dest => dest.HomeTeamPrimaryColor,
+        opt => opt.MapFrom(src => src.HomeTeam.TeamPrimaryColor))
+    .ForMember(dest => dest.AwayTeamPrimaryColor,
+        opt => opt.MapFrom(src => src.AwayTeam.TeamPrimaryColor));
+    //.ForMember(dest => dest.HomePlayerStats,
+     //   opt => opt.MapFrom(src => src.PlayerStats.Where(ps => ps.IsHomeTeam)))
+    //.ForMember(dest => dest.AwayPlayerStats,
+    //    opt => opt.MapFrom(src => src.PlayerStats.Where(ps => !ps.IsHomeTeam)));
+
+
+
+            //MatchPlayerStats
+            CreateMap<MatchPlayerStatDto, MatchPlayerStat>();
+            CreateMap<MatchPlayerStat, MatchPlayerStatDto>();
 
             //Group
             CreateMap<Group, GroupDto>();

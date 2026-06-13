@@ -422,11 +422,7 @@ namespace fut7Manager.Api.Services {
 
             return dashboard;
         }
-        private static void AddResult(StandingDto standing, string result) {
-            standing.Last5Results.Insert(0, result);
-            if (standing.Last5Results.Count > 5)
-                standing.Last5Results.RemoveAt(5);
-        }
+        
         public async Task<StandingsResponseDto> GetStandingsAsync(int leagueId) {
             var league = await _context.Leagues
                 .FirstAsync(l => l.Id == leagueId);

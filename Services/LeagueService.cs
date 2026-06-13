@@ -73,11 +73,6 @@ namespace fut7Manager.Api.Services {
             if (league == null)
                 return false;
 
-            //var isValid =await IsQualifiedTeamsPerGroupValid(id, dto.QualifiedTeamsPerGroup);
-
-            //if (!isValid)
-              //  return false;
-
             _mapper.Map(dto, league);
 
             await _context.SaveChangesAsync();
@@ -97,23 +92,6 @@ namespace fut7Manager.Api.Services {
             return true;
         }
 
-        //private async Task<bool> IsQualifiedTeamsPerGroupValid(int leagueId, int qualifiedTeamsPerGroup) {
-        //    var totalTeams = await _context.Teams
-        //        .CountAsync(t => t.LeagueId == leagueId);
 
-        //    var totalGroups = await _context.Groups
-        //        .CountAsync(g => g.LeagueId == leagueId);
-
-        //    if (totalGroups <= 0)
-        //        return false;
-
-        //    // grupo más pequeño
-        //    var minTeamsPerGroup = totalTeams / totalGroups;
-
-        //    if (minTeamsPerGroup <= 0)
-        //        return false;
-
-        //    return qualifiedTeamsPerGroup <= minTeamsPerGroup;
-        //}
     }
 }

@@ -8,8 +8,9 @@ namespace fut7Manager.Api.Services.Interfaces {
         Task<PagedResult<Fut7MatchDto>> GetMatchesAsync(int? leagueId, int? teamId, PaginationParams pagination);
 
         Task<Fut7MatchDto?> GetMatchByIdAsync(int id);
+        Task<Fut7MatchDetailsDto?> GetMatchDetailsByIdAsync(int id);
 
-        Task<Fut7MatchDto> CreateMatchAsync(CreateFut7MatchDto dto);
+            Task<Fut7MatchDto> CreateMatchAsync(CreateFut7MatchDto dto);
 
         Task<Fut7MatchDto?> UpdateMatchAsync(int id, UpdateFut7MatchDto dto);
         Task<bool> DeleteMatchAsync(int id);

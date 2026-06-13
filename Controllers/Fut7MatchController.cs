@@ -41,6 +41,16 @@ namespace fut7Manager.Api.Controllers {
             return Ok(match);
         }
 
+        [HttpGet("{id}/details")]
+        public async Task<ActionResult<Fut7MatchDetailsDto>> GetMatchDetails(int id) {
+            var match = await _matchService.GetMatchDetailsByIdAsync(id);
+
+            if (match == null)
+                return NotFound();
+
+            return Ok(match);
+        }
+
         [HttpPost]
         public async Task<ActionResult<Fut7MatchDto>> CreateMatch(CreateFut7MatchDto dto) {
             var match = await _matchService.CreateMatchAsync(dto);

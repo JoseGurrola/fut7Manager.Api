@@ -96,6 +96,15 @@ namespace fut7Manager.Api.Services {
                 .FirstOrDefaultAsync();
         }
 
+        public async Task<Fut7MatchDetailsDto?> GetMatchDetailsByIdAsync(int id) {
+            return await _context.Matches
+                .Include(m => m.PlayerStats) // importante
+                .Where(m => m.Id == id)
+                .ProjectTo<Fut7MatchDetailsDto>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
+        }
+
+
         public async Task<Fut7MatchDto> CreateMatchAsync(CreateFut7MatchDto dto) {
             var match = _mapper.Map<Fut7Match>(dto);
 
@@ -106,12 +115,41 @@ namespace fut7Manager.Api.Services {
         }
 
         public async Task<Fut7MatchDto?> UpdateMatchAsync(int id, UpdateFut7MatchDto dto) {
-            var match = await _context.Matches.FindAsync(id);
+            var match = await _context.Matches.Include(x => x.PlayerStats)
+                .FirstOrDefaultAsync(x => x.Id == id);
 
             if (match == null)
                 return null;
 
             _mapper.Map(dto, match);
+
+            _context.MatchPlayerStats.RemoveRange(match.PlayerStats);
+
+            match.PlayerStats.Clear();
+
+            foreach (var stat in dto.HomePlayerStats) {
+                match.PlayerStats.Add(new MatchPlayerStat {
+                    PlayerId = stat.PlayerId,
+                    PlayerName = stat.PlayerName,
+                    JerseyNumber = stat.JerseyNumber,
+                    //IsHomeTeam = true,
+                    Goals = stat.Goals,
+                    YellowCards = stat.YellowCards,
+                    RedCards = stat.RedCards
+                });
+            }
+
+            foreach (var stat in dto.AwayPlayerStats) {
+                match.PlayerStats.Add(new MatchPlayerStat {
+                    PlayerId = stat.PlayerId,
+                    PlayerName = stat.PlayerName,
+                    JerseyNumber = stat.JerseyNumber,
+                    //IsHomeTeam = false,
+                    Goals = stat.Goals,
+                    YellowCards = stat.YellowCards,
+                    RedCards = stat.RedCards
+                });
+            }
 
             await _context.SaveChangesAsync();
 

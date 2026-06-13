@@ -21,6 +21,8 @@ namespace fut7Manager.Data {
 
         public DbSet<Payment> Payments { get; set; }
 
+        public DbSet<MatchPlayerStat> MatchPlayerStats { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
             base.OnModelCreating(modelBuilder);
 
@@ -72,6 +74,12 @@ namespace fut7Manager.Data {
                 .HasOne(p => p.Team)
                 .WithMany(t => t.Payments)
                 .HasForeignKey(p => p.TeamId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<MatchPlayerStat>()
+                .HasOne(x => x.Match)
+                .WithMany(x => x.PlayerStats)
+                .HasForeignKey(x => x.MatchId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Team>(entity =>
