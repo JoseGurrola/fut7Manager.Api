@@ -98,10 +98,11 @@ namespace fut7Manager.Api.Services {
 
         public async Task<Fut7MatchDetailsDto?> GetMatchDetailsByIdAsync(int id) {
             return await _context.Matches
-                .Include(m => m.PlayerStats) // importante
-                .Where(m => m.Id == id)
-                .ProjectTo<Fut7MatchDetailsDto>(_mapper.ConfigurationProvider)
-                .FirstOrDefaultAsync();
+            .Include(m => m.PlayerStats)
+                .ThenInclude(ps => ps.Player)   // 🔹 carga datos del jugador
+            .Where(m => m.Id == id)
+            .ProjectTo<Fut7MatchDetailsDto>(_mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync();
         }
 
 
@@ -132,7 +133,7 @@ namespace fut7Manager.Api.Services {
                     PlayerId = stat.PlayerId,
                     PlayerName = stat.PlayerName,
                     JerseyNumber = stat.JerseyNumber,
-                    //IsHomeTeam = true,
+                    IsHomeTeam = true,
                     Goals = stat.Goals,
                     YellowCards = stat.YellowCards,
                     RedCards = stat.RedCards
@@ -144,7 +145,7 @@ namespace fut7Manager.Api.Services {
                     PlayerId = stat.PlayerId,
                     PlayerName = stat.PlayerName,
                     JerseyNumber = stat.JerseyNumber,
-                    //IsHomeTeam = false,
+                    IsHomeTeam = false,
                     Goals = stat.Goals,
                     YellowCards = stat.YellowCards,
                     RedCards = stat.RedCards

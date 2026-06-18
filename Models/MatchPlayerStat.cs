@@ -19,5 +19,6 @@
         public int RedCards { get; set; }
 
         public Fut7Match Match { get; set; } = default!;
+        public Player? Player { get; set; }   // 🔹 navegación hacia Player
     }
 }

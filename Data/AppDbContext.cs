@@ -82,6 +82,11 @@ namespace fut7Manager.Data {
                 .HasForeignKey(x => x.MatchId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<MatchPlayerStat>()
+                .HasOne(mps => mps.Player)
+                .WithMany()
+                .HasForeignKey(mps => mps.PlayerId);
+
             modelBuilder.Entity<Team>(entity =>
             {
                 entity.HasOne(t => t.Group)

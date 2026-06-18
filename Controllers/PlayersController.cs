@@ -1,9 +1,11 @@
 ﻿using fut7Manager.Api.DTOs.Requests;
 using fut7Manager.Api.DTOs.Responses;
 using fut7Manager.Api.Extensions;
+using fut7Manager.Api.Helpers;
 using fut7Manager.Api.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace fut7Manager.Controllers {
     [ApiController]
@@ -26,6 +28,19 @@ namespace fut7Manager.Controllers {
 
             return Ok(result.Items);
         }
+
+        [HttpGet("basic")]
+        public async Task<ActionResult<IEnumerable<PlayerBasicDto>>> GetPlayersBasic(
+     [FromQuery] int? leagueId, [FromQuery] int? teamId,
+     [FromQuery] PaginationParams pagination) {
+            var result = await _playerService.GetPlayersBasicAsync(leagueId, teamId, pagination);
+
+            Response.AddPaginationHeader(result);
+
+            return Ok(result.Items);
+        }
+
+
 
         [HttpGet("{id}")]
         public async Task<ActionResult<PlayerDto>> GetPlayer(int id) {

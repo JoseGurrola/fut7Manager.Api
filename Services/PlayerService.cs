@@ -61,6 +61,46 @@ namespace fut7Manager.Api.Services {
                 pagination.PageSize);
         }
 
+        public async Task<PagedResult<PlayerBasicDto>> GetPlayersBasicAsync(int? leagueId, int? teamId, PaginationParams pagination) {
+            var query = _context.Players
+                .AsNoTracking()
+                .AsQueryable();
+
+            if (leagueId.HasValue)
+                query = query.Where(p => p.Team.LeagueId == leagueId.Value);
+
+            if (teamId.HasValue)
+                query = query.Where(p => p.TeamId == teamId.Value);
+
+            var dtoQuery = query
+                .Select(p => new PlayerBasicDto {
+                    Id = p.Id,
+                    Name = p.Name,
+                    JerseyNumber = p.JerseyNumber
+                });
+
+            // SIN PAGINADO
+            if (pagination.PageSize == 0) {
+                var items = await dtoQuery
+                    .OrderBy(x => x.JerseyNumber)
+                    .ToListAsync();
+
+                return new PagedResult<PlayerBasicDto> {
+                    Items = items,
+                    PageNumber = 1,
+                    PageSize = items.Count == 0 ? 1 : items.Count,
+                    TotalCount = items.Count
+                };
+            }
+
+            // CON PAGINADO
+            return await dtoQuery.ToPagedResultAsync(
+                q => q.OrderBy(x => x.Id),
+                pagination.PageNumber,
+                pagination.PageSize);
+        }
+
+
         public async Task<PlayerDto?> GetPlayerByIdAsync(int id) {
             return await _context.Players
                 .Where(p => p.Id == id)

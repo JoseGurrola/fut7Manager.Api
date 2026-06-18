@@ -89,6 +89,12 @@ namespace fut7Manager.Api.Mapping {
             CreateMap<CreateFut7MatchDto, Fut7Match>();
             CreateMap<UpdateFut7MatchDto, Fut7Match>();
 
+            // 🔹 Mapeo de cada stat individual
+            //MatchPlayerStats
+            CreateMap<MatchPlayerStatDto, MatchPlayerStat>();
+            // CreateMap<MatchPlayerStat, MatchPlayerStatDto>();
+
+            // 🔹 Mapeo del partido completo
             CreateMap<Fut7Match, Fut7MatchDetailsDto>()
     .ForMember(dest => dest.HomeTeamId,
         opt => opt.MapFrom(src => src.HomeTeamId))
@@ -107,17 +113,26 @@ namespace fut7Manager.Api.Mapping {
     .ForMember(dest => dest.HomeTeamPrimaryColor,
         opt => opt.MapFrom(src => src.HomeTeam.TeamPrimaryColor))
     .ForMember(dest => dest.AwayTeamPrimaryColor,
-        opt => opt.MapFrom(src => src.AwayTeam.TeamPrimaryColor));
-    //.ForMember(dest => dest.HomePlayerStats,
-     //   opt => opt.MapFrom(src => src.PlayerStats.Where(ps => ps.IsHomeTeam)))
-    //.ForMember(dest => dest.AwayPlayerStats,
-    //    opt => opt.MapFrom(src => src.PlayerStats.Where(ps => !ps.IsHomeTeam)));
+        opt => opt.MapFrom(src => src.AwayTeam.TeamPrimaryColor))
+    .ForMember(dest => dest.HomePlayerStats,
+        opt => opt.MapFrom(src => src.PlayerStats.Where(ps => ps.IsHomeTeam)))
+    .ForMember(dest => dest.AwayPlayerStats,
+        opt => opt.MapFrom(src => src.PlayerStats.Where(ps => !ps.IsHomeTeam)));
 
 
 
-            //MatchPlayerStats
-            CreateMap<MatchPlayerStatDto, MatchPlayerStat>();
-            CreateMap<MatchPlayerStat, MatchPlayerStatDto>();
+            CreateMap<MatchPlayerStat, MatchPlayerStatDto>()
+    .ForMember(dest => dest.PlayerName,
+        opt => opt.MapFrom(src => src.Player != null ? src.Player.Name : src.PlayerName))
+    .ForMember(dest => dest.JerseyNumber,
+        opt => opt.MapFrom(src => src.Player != null ? src.Player.JerseyNumber : src.JerseyNumber))
+    .ForMember(dest => dest.Goals,
+        opt => opt.MapFrom(src => src.Goals))
+    .ForMember(dest => dest.YellowCards,
+        opt => opt.MapFrom(src => src.YellowCards))
+    .ForMember(dest => dest.RedCards,
+        opt => opt.MapFrom(src => src.RedCards));
+
 
             //Group
             CreateMap<Group, GroupDto>();
