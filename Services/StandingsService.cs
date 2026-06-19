@@ -18,11 +18,7 @@ namespace fut7Manager.Api.Services {
             _query = query;
         }
 
-        private List<GroupStandingDto> BuildGroupedStandings(
-    League league,
-    List<Team> teams,
-    List<Fut7Match> matches,
-    List<GroupModel> groups) {
+        private List<GroupStandingDto> BuildGroupedStandings(League league, List<Team> teams, List<Fut7Match> matches, List<GroupModel> groups) {
             var generalStandings = _engine.Build(
                 teams,
                 matches.Where(m => m.HomeGoals.HasValue && m.AwayGoals.HasValue).ToList(),
@@ -106,12 +102,93 @@ namespace fut7Manager.Api.Services {
             return result;
         }
 
+        private PlayerStandingsDto BuildPlayerStandings(List<Fut7Match> matches) {
+            var stats = matches
+                .SelectMany(m => m.PlayerStats)
+                .Where(s => s.PlayerId != null) // evita agrupar nulls
+                .GroupBy(s => s.PlayerId)
+                .Select(g => new PlayerStatStandingDto {
+                    PlayerId = g.Key ?? 0,
+                    PlayerName = g.First().PlayerName,
+                    JerseyNumber = g.First().JerseyNumber ?? 0,
+                    TeamName = g.First().Player?.Team?.Name
+                               ?? (g.First().IsHomeTeam
+                                   ? g.First().Match.HomeTeam.Name
+                                   : g.First().Match.AwayTeam.Name),
+                    TeamLogoUrl = g.First().Player?.Team?.LogoUrl
+                                  ?? (g.First().IsHomeTeam
+                                      ? g.First().Match.HomeTeam.LogoUrl
+                                      : g.First().Match.AwayTeam.LogoUrl),
+                    Goals = g.Sum(x => x.Goals),
+                    YellowCards = g.Sum(x => x.YellowCards),
+                    RedCards = g.Sum(x => x.RedCards)
+                })
+                .ToList();
 
-        public LeagueDashboardDto BuildDashboard(
-    League league,
-    List<Team> teams,
-    List<Fut7Match> matches,
-    List<GroupModel> groups) {
+
+            var playerStandings = new PlayerStandingsDto {
+                TopScorers = stats
+        .Where(s => s.Goals > 0)
+        .OrderByDescending(s => s.Goals)
+        .ThenBy(s => s.PlayerName)
+        .Take(30)
+        .Select((s, i) => new PlayerStatStandingDto {
+            PlayerId = s.PlayerId,
+            PlayerName = s.PlayerName,
+            JerseyNumber = s.JerseyNumber,
+            TeamName = s.TeamName,
+            TeamLogoUrl = s.TeamLogoUrl,
+            Goals = s.Goals,
+            YellowCards = s.YellowCards,
+            RedCards = s.RedCards,
+            Position = i + 1
+        })
+        .ToList(),
+
+                YellowCards = stats
+        .Where(s => s.YellowCards > 0)
+        .OrderByDescending(s => s.YellowCards)
+        .ThenBy(s => s.PlayerName)
+        .Take(30)
+        .Select((s, i) => new PlayerStatStandingDto {
+            PlayerId = s.PlayerId,
+            PlayerName = s.PlayerName,
+            JerseyNumber = s.JerseyNumber,
+            TeamName = s.TeamName,
+            TeamLogoUrl = s.TeamLogoUrl,
+            Goals = s.Goals,
+            YellowCards = s.YellowCards,
+            RedCards = s.RedCards,
+            Position = i + 1
+        })
+        .ToList(),
+
+                RedCards = stats
+        .Where(s => s.RedCards > 0)
+        .OrderByDescending(s => s.RedCards)
+        .ThenBy(s => s.PlayerName)
+        .Take(30)
+        .Select((s, i) => new PlayerStatStandingDto {
+            PlayerId = s.PlayerId,
+            PlayerName = s.PlayerName,
+            JerseyNumber = s.JerseyNumber,
+            TeamName = s.TeamName,
+            TeamLogoUrl = s.TeamLogoUrl,
+            Goals = s.Goals,
+            YellowCards = s.YellowCards,
+            RedCards = s.RedCards,
+            Position = i + 1
+        })
+        .ToList()
+            };
+
+
+            return playerStandings;
+        }
+
+
+
+        public LeagueDashboardDto BuildDashboard(League league, List<Team> teams, List<Fut7Match> matches, List<GroupModel> groups) {
             var generalAcc = _engine.Build(
                 teams,
                 matches.Where(m => m.HomeGoals.HasValue && m.AwayGoals.HasValue).ToList(),
@@ -139,9 +216,12 @@ namespace fut7Manager.Api.Services {
                 }
             }
 
+            var playerStandings = BuildPlayerStandings(matches);
+
             return new LeagueDashboardDto {
                 GroupedStandings = grouped,
-                Standings = general
+                Standings = general,
+                PlayerStandings = playerStandings
             };
         }
 

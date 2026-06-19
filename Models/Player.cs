@@ -36,5 +36,7 @@ namespace fut7Manager.Api.Models {
 
         // Navigation Property
         public Team Team { get; set; } = default!;
+
+        public ICollection<MatchPlayerStat> MatchPlayerStats { get; set; } = new List<MatchPlayerStat>();
     }
 }

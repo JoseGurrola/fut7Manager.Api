@@ -432,25 +432,22 @@ namespace fut7Manager.Api.Services {
                 .ToListAsync();
 
             var matches = await _context.Matches
-                .Where(m =>
-                    m.LeagueId == leagueId &&
-                    m.HomeGoals != null &&
-                    m.AwayGoals != null)
+                .Include(m => m.PlayerStats)
+                    .ThenInclude(ps => ps.Player!)
+                        .ThenInclude(p => p.Team)
+                .Where(m => m.LeagueId == leagueId && m.HomeGoals != null && m.AwayGoals != null)
                 .ToListAsync();
 
             var groups = await _context.Groups
                 .Where(g => g.LeagueId == leagueId)
                 .ToListAsync();
 
-            var dashboard = _standingsService.BuildDashboard(
-                league,
-                teams,
-                matches,
-                groups);
+            var dashboard = _standingsService.BuildDashboard(league, teams, matches, groups);
 
             return new StandingsResponseDto {
                 GroupedStandings = dashboard.GroupedStandings,
-                Standings = dashboard.Standings
+                Standings = dashboard.Standings,
+                PlayerStandings = dashboard.PlayerStandings
             };
         }
     }

@@ -83,9 +83,11 @@ namespace fut7Manager.Data {
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<MatchPlayerStat>()
-                .HasOne(mps => mps.Player)
-                .WithMany()
-                .HasForeignKey(mps => mps.PlayerId);
+                .HasOne(mps => mps.Player)              // navegación hacia Player
+                .WithMany(p => p.MatchPlayerStats)      // colección en Player (debes tenerla)
+                .HasForeignKey(mps => mps.PlayerId)     // FK en MatchPlayerStat
+                .OnDelete(DeleteBehavior.Restrict);     // evita borrados en cascada si no quieres
+
 
             modelBuilder.Entity<Team>(entity =>
             {

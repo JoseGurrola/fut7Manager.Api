@@ -5,5 +5,7 @@
         public List<GroupStandingDto> GroupedStandings { get; set; } = new();
 
         public List<StandingDto> Standings { get; set; } = new();
+
+        public PlayerStandingsDto PlayerStandings { get; set; } = new();
     }
 }
