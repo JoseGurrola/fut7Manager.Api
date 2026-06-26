@@ -378,7 +378,10 @@ namespace fut7Manager.Api.Services {
                 .ToListAsync();
 
             var matches = await _context.Matches
-                .Where(m => m.LeagueId == leagueId)
+                .Include(m => m.PlayerStats)
+                    .ThenInclude(ps => ps.Player!)
+                        .ThenInclude(p => p.Team)
+                .Where(m => m.LeagueId == leagueId && m.HomeGoals != null && m.AwayGoals != null)
                 .ToListAsync();
 
             var groups = await _context.Groups
@@ -412,13 +415,25 @@ namespace fut7Manager.Api.Services {
                 matchdayDto = _mapper.Map<MatchdayDto>(currentMatchday);
             }
 
-            var dashboard = _standingsService.BuildDashboard(
-                league,
-                teams,
-                matches.Where(m => m.HomeGoals != null && m.AwayGoals != null).ToList(),
-                groups);
+            var dashboard = _standingsService.BuildDashboard(league, teams, matches.Where(m => m.HomeGoals != null && m.AwayGoals != null).ToList(), groups, 5);
 
             dashboard.CurrentMatchday = matchdayDto;
+
+            // 🔹 Calcular totales de pagos
+            var payments = await _context.Payments
+                .Where(p => teams.Select(t => t.Id).Contains(p.TeamId))
+                .ToListAsync();
+
+            var totalDue = league.RegistrationFee * teams.Count;
+            var totalPaid = payments.Sum(p => p.Amount);
+            var percentagePaid = totalDue > 0 ? Math.Round((totalPaid / totalDue) * 100, 2) : 0;
+
+            // 🔹 Asignar al dashboard
+            dashboard.PaymentSummary = new PaymentSummaryDto {
+                TotalDue = totalDue,
+                TotalPaid = totalPaid,
+                PercentagePaid = percentagePaid
+            };
 
             return dashboard;
         }
@@ -442,7 +457,7 @@ namespace fut7Manager.Api.Services {
                 .Where(g => g.LeagueId == leagueId)
                 .ToListAsync();
 
-            var dashboard = _standingsService.BuildDashboard(league, teams, matches, groups);
+            var dashboard = _standingsService.BuildDashboard(league, teams, matches, groups, 30);
 
             return new StandingsResponseDto {
                 GroupedStandings = dashboard.GroupedStandings,

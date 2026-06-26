@@ -22,6 +22,7 @@ namespace fut7Manager.Api.Services {
         public async Task<PagedResult<PaymentDto>> GetPaymentsAsync(int? teamId, int? leagueId, PaginationParams pagination) {
             var query = _context.Payments
                 .AsNoTracking()
+                .Include(p => p.Team)   // necesario si filtras por LeagueId
                 .AsQueryable();
 
             // teamId
@@ -35,6 +36,21 @@ namespace fut7Manager.Api.Services {
             var dtoQuery = query
                 .ProjectTo<PaymentDto>(_mapper.ConfigurationProvider);
 
+
+            // SIN PAGINADO
+            if (pagination.PageSize == 0) {
+                var items = await dtoQuery
+                    .ToListAsync();
+
+                return new PagedResult<PaymentDto> {
+                    Items = items,
+                    PageNumber = 1,
+                    PageSize = items.Count == 0 ? 1 : items.Count,
+                    TotalCount = items.Count
+                };
+            }
+
+            // CON PAGINADO
             return await dtoQuery.ToPagedResultAsync(q => q.OrderBy(x => x.Id),
                 pagination.PageNumber,
                 pagination.PageSize);

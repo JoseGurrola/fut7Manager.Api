@@ -7,5 +7,9 @@
         public List<StandingDto> Standings { get; set; } = new();
 
         public PlayerStandingsDto PlayerStandings { get; set; } = new();
+
+        public PaymentSummaryDto PaymentSummary { get; set; } = new();
+
+
     }
 }

@@ -102,7 +102,7 @@ namespace fut7Manager.Api.Services {
             return result;
         }
 
-        private PlayerStandingsDto BuildPlayerStandings(List<Fut7Match> matches) {
+        private PlayerStandingsDto BuildPlayerStandings(List<Fut7Match> matches, int playersStatsCount) {
             var stats = matches
                 .SelectMany(m => m.PlayerStats)
                 .Where(s => s.PlayerId != null) // evita agrupar nulls
@@ -131,7 +131,7 @@ namespace fut7Manager.Api.Services {
         .Where(s => s.Goals > 0)
         .OrderByDescending(s => s.Goals)
         .ThenBy(s => s.PlayerName)
-        .Take(30)
+        .Take(playersStatsCount)
         .Select((s, i) => new PlayerStatStandingDto {
             PlayerId = s.PlayerId,
             PlayerName = s.PlayerName,
@@ -149,7 +149,7 @@ namespace fut7Manager.Api.Services {
         .Where(s => s.YellowCards > 0)
         .OrderByDescending(s => s.YellowCards)
         .ThenBy(s => s.PlayerName)
-        .Take(30)
+        .Take(playersStatsCount)
         .Select((s, i) => new PlayerStatStandingDto {
             PlayerId = s.PlayerId,
             PlayerName = s.PlayerName,
@@ -167,7 +167,7 @@ namespace fut7Manager.Api.Services {
         .Where(s => s.RedCards > 0)
         .OrderByDescending(s => s.RedCards)
         .ThenBy(s => s.PlayerName)
-        .Take(30)
+        .Take(playersStatsCount)
         .Select((s, i) => new PlayerStatStandingDto {
             PlayerId = s.PlayerId,
             PlayerName = s.PlayerName,
@@ -188,7 +188,7 @@ namespace fut7Manager.Api.Services {
 
 
 
-        public LeagueDashboardDto BuildDashboard(League league, List<Team> teams, List<Fut7Match> matches, List<GroupModel> groups) {
+        public LeagueDashboardDto BuildDashboard(League league, List<Team> teams, List<Fut7Match> matches, List<GroupModel> groups, int playersStatsCount) {
             var generalAcc = _engine.Build(
                 teams,
                 matches.Where(m => m.HomeGoals.HasValue && m.AwayGoals.HasValue).ToList(),
@@ -216,7 +216,7 @@ namespace fut7Manager.Api.Services {
                 }
             }
 
-            var playerStandings = BuildPlayerStandings(matches);
+            var playerStandings = BuildPlayerStandings(matches, playersStatsCount);
 
             return new LeagueDashboardDto {
                 GroupedStandings = grouped,

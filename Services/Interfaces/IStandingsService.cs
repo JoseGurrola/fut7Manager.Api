@@ -7,7 +7,8 @@ namespace fut7Manager.Api.Services.Interfaces {
             League league,
             List<Team> teams,
             List<Fut7Match> matches,
-            List<Group> groups);
+            List<Group> groups,
+            int playersStatsCount);
     }
 }
 
